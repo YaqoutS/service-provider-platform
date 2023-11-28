@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@RequiredArgsConstructor
 @Getter
 @Setter
 @ToString
