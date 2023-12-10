@@ -1,7 +1,6 @@
 package com.graduationproject.serviceproviderplatform.model;
 
 import com.graduationproject.serviceproviderplatform.model.validator.PasswordMatch;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -23,7 +22,7 @@ import java.util.stream.Collectors;
 public class User implements UserDetails {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NonNull
@@ -31,19 +30,20 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @NonNull
-    @NotEmpty(message = "First Name can't be empty.")
-    private String firstName;
+//    @NonNull
+//    @NotEmpty(message = "First Name can't be empty.")
+//    private String firstName;
 
-    @NonNull
-    @NotEmpty(message = "Last Name can't be empty.")
-    private String lastName;
+//    @NonNull
+//    @NotEmpty(message = "Last Name can't be empty.")
+//    private String lastName;
 
-    @Transient
-    @Setter(AccessLevel.NONE)
+//    @Transient
+//    @Setter(AccessLevel.NONE)
+    @NonNull
     private String fullName;
 
-    @NonNull
+//    @NonNull
     private int age;
 
     private String location;
@@ -53,20 +53,15 @@ public class User implements UserDetails {
     private String password;
 
     @Transient
-    @NotEmpty(message = "Please enter Password Confirmation.")
     private String confirmPassword;
 
-    private String activationCode;
+//    private String activationCode;
 
     @NonNull
     @Column(nullable = false)
     private boolean enabled;
 
-//    @NonNull
-//    @NotEmpty(message = "Please enter alias.")
-//    @Column(nullable = false, unique = true)
-//    private String alias;
-
+    @ToString.Exclude
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "users_roles",
@@ -75,10 +70,10 @@ public class User implements UserDetails {
     )
     private Set<Role> roles = new HashSet<>();
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "image_id", referencedColumnName = "id")
+    private Image image;
 
-    public String getFullName(){
-        return firstName + " " + lastName;
-    }
 
     public String getConfirmPassword(){
         return confirmPassword;
@@ -88,7 +83,6 @@ public class User implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
     }
-
 
     public void addRole(Role role) {
         roles.add(role);

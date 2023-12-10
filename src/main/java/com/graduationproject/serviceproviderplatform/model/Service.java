@@ -1,5 +1,6 @@
 package com.graduationproject.serviceproviderplatform.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,7 +23,12 @@ public class Service {
     @NonNull
     private String description;
 
-    private int yearsOfExperience;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "image_id", referencedColumnName = "id")
+    private Image image;
+
+    @ManyToOne
+    private Company company; // If this is null, that means it belong to a freelancer not to a company
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -30,17 +36,29 @@ public class Service {
             joinColumns = @JoinColumn(name = "service_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "employee_id", referencedColumnName = "id")
     )
-    private List<Employee> employees = new ArrayList<>();
+    private List<Employee> employees = new ArrayList<>(); // If the service belong to a freelancer, This list will only have one employee
 
     private boolean isAvailable;
 
     @ManyToMany(mappedBy = "services")
-    private List<Category> categories;
+    @JsonIgnore
+    private List<Category> categories = new ArrayList<>();
 
     @NonNull
     private Long avgPrice;
 
     @OneToMany(mappedBy = "service")
-    @NonNull
+    //@NonNull
     private List<ServiceOption> serviceOptions = new ArrayList<>();
+
+    @OneToMany(mappedBy = "service")
+    private List<Request> requests = new ArrayList<>();
+
+    public void addCategory(Category category) {
+        categories.add(category);
+    }
+
+    public void addEmployee(Employee employee) {
+        employees.add(employee);
+    }
 }

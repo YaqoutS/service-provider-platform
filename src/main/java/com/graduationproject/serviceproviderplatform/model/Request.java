@@ -1,14 +1,11 @@
 package com.graduationproject.serviceproviderplatform.model;
 
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Future;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -22,19 +19,28 @@ public class Request extends Auditable {
     private Long id;
 
     @NonNull
-    private Long serviceId;
+    @ManyToOne
+    private Service service;
 
     @Future
-    private Date date;
+    private LocalDateTime date;
+
+    @ManyToOne
+    private Company company;
 
     @NonNull
-    private Long employeeId;
+    @ManyToOne
+    private Employee employee;
 
     @NonNull
-    private Long customerId;
+    @ManyToOne
+    private Customer customer;
+
+    @OneToOne
+    private ServiceFeedback feedback;
 
     @NonNull
-    private String status;
+    private String status; //completed inComplete
 
     @ElementCollection
     private List<Integer> choices = new ArrayList<>();

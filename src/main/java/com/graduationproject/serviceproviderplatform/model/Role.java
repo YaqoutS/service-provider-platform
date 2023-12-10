@@ -1,12 +1,14 @@
 package com.graduationproject.serviceproviderplatform.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import lombok.*;
 
-import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @RequiredArgsConstructor
@@ -23,7 +25,9 @@ public class Role {
     @NonNull
     private String name;
 
+    @ToString.Exclude
     @ManyToMany( mappedBy = "roles")
-    private Collection<User> users;
+    @JsonIgnore
+    private Set<User> users = new HashSet<>();
 
 }
