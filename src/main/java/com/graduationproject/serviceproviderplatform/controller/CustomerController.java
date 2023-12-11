@@ -54,18 +54,18 @@ public class CustomerController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The id in the Url is different from the one in the body");
         }
         if(!customerRepository.existsById(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no employee with id = " + id);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no customer with id = " + id);
         }
         Customer updatedCustomer = customerRepository.findById(id).get();
         updatedCustomer.setConfirmPassword(updatedCustomer.getPassword());
         System.out.println("Customer: " + customerDTO);
         System.out.println("Updated customer: " + updatedCustomer);
 
-        if(customerRepository.existsByFullName(customerDTO.getFullName())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("This name is used by another Customer!");
+        if(userRepository.existsByFullName(customerDTO.getFullName())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("This name is used by another User!");
         }
         updatedCustomer.setFullName(customerDTO.getFullName());
-        updatedCustomer.setAge(customerDTO.getAge());
+        updatedCustomer.setDateOfBirth(customerDTO.getDateOfBirth());
         updatedCustomer.setImage(customerDTO.getImage());
         updatedCustomer.setLocation(customerDTO.getLocation());
 
@@ -109,6 +109,4 @@ public class CustomerController {
         }
         return ResponseEntity.status(HttpStatus.OK).body(incompleteRequests);
     }
-
-
 }

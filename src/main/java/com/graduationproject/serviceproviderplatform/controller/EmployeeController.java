@@ -73,7 +73,7 @@ public class EmployeeController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("This name is used by another user!");
         }
         updatedEmployee.setFullName(employeeDTO.getFullName());
-        updatedEmployee.setAge(employeeDTO.getAge());
+        updatedEmployee.setDateOfBirth(employeeDTO.getDateOfBirth());
         updatedEmployee.setLocation(employeeDTO.getLocation());
         updatedEmployee.setImage(employeeDTO.getImage());
         updatedEmployee.setRating(employeeDTO.getRating()); //I think there is no need for this line because the rating will change with every feedback, and it has its own API

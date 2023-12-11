@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,7 +19,7 @@ public class UserDTO {
     @NonNull
     private String fullName;
 
-    private int age;
+    private LocalDate dateOfBirth;
 
     private String location;
 

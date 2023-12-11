@@ -7,8 +7,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -43,15 +45,17 @@ public class ServiceProviderPlatformApplication {
             customer.setConfirmPassword(secret);
             customerRepository.save(customer);
 
-            User admin = new User("admin@gmail.com", "Admin Admin", secret, true);
-            admin.addRole(adminRole);
-            admin.setConfirmPassword(secret);
-            userRepository.save(admin);
-
             Employee employee = new Employee("employee@gmail.com", "Employee Employee", secret, true, true);
             employee.addRole(employeeRole);
             employee.setConfirmPassword(secret);
             employeeRepository.save(employee);
+
+            User admin = new User("admin@gmail.com", "Admin Admin", secret, true);
+            admin.addRole(adminRole);
+            admin.setConfirmPassword(secret);
+            admin.setDateOfBirth(LocalDate.of(2001, 11, 18));
+            userRepository.save(admin);
+            System.out.println("Age: " + userRepository.findByEmail("admin@gmail.com").get().getAge());
 
             System.out.println("Users and roles added successfully");
 

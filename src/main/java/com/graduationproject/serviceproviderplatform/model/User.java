@@ -1,13 +1,18 @@
 package com.graduationproject.serviceproviderplatform.model;
 
 import com.graduationproject.serviceproviderplatform.model.validator.PasswordMatch;
+import jakarta.validation.constraints.Past;
 import lombok.*;
+import org.aspectj.lang.annotation.Before;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
+
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,7 +48,10 @@ public class User implements UserDetails {
     @NonNull
     private String fullName;
 
-//    @NonNull
+    @Past(message = "Date of birth must be in the past.")
+    private LocalDate dateOfBirth;
+
+    @Transient
     private int age;
 
     private String location;
@@ -74,6 +82,12 @@ public class User implements UserDetails {
     @JoinColumn(name = "image_id", referencedColumnName = "id")
     private Image image;
 
+    @PostLoad
+    private void calculateAge() {
+        if (dateOfBirth != null) {
+            age = Period.between(dateOfBirth, LocalDate.now()).getYears();
+        }
+    }
 
     public String getConfirmPassword(){
         return confirmPassword;
