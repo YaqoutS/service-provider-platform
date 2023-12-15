@@ -1,9 +1,6 @@
 package com.graduationproject.serviceproviderplatform.controller;
 
-import com.graduationproject.serviceproviderplatform.model.Employee;
-import com.graduationproject.serviceproviderplatform.model.EmployeeDTO;
-import com.graduationproject.serviceproviderplatform.model.Request;
-import com.graduationproject.serviceproviderplatform.model.Service;
+import com.graduationproject.serviceproviderplatform.model.*;
 import com.graduationproject.serviceproviderplatform.repository.EmployeeRepository;
 import com.graduationproject.serviceproviderplatform.repository.ServiceRepository;
 import com.graduationproject.serviceproviderplatform.repository.UserRepository;
@@ -74,7 +71,7 @@ public class EmployeeController {
         }
         updatedEmployee.setFullName(employeeDTO.getFullName());
         updatedEmployee.setDateOfBirth(employeeDTO.getDateOfBirth());
-        updatedEmployee.setLocation(employeeDTO.getLocation());
+        updatedEmployee.setAddress(employeeDTO.getAddress());
         updatedEmployee.setImage(employeeDTO.getImage());
         updatedEmployee.setRating(employeeDTO.getRating()); //I think there is no need for this line because the rating will change with every feedback, and it has its own API
         updatedEmployee.setAvailable(employeeDTO.isAvailable());
@@ -141,5 +138,14 @@ public class EmployeeController {
             }
         }
         return ResponseEntity.status(HttpStatus.OK).body(incompleteRequests);
+    }
+
+    @GetMapping("/{id}/feedbacks")
+    public ResponseEntity<List<ServiceFeedback>> getEmployeeFeedbacks(@PathVariable Long id) {
+        if(!employeeRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        Employee employee = employeeRepository.findById(id).get();
+        return ResponseEntity.status(HttpStatus.OK).body(employee.getFeedbacks());
     }
 }

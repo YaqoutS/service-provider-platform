@@ -31,32 +31,12 @@ public class User implements UserDetails {
     private Long id;
 
     @NonNull
+    private String fullName;
+
+    @NonNull
     @Size(min = 8, max = 30)
     @Column(nullable = false, unique = true)
     private String email;
-
-//    @NonNull
-//    @NotEmpty(message = "First Name can't be empty.")
-//    private String firstName;
-
-//    @NonNull
-//    @NotEmpty(message = "Last Name can't be empty.")
-//    private String lastName;
-
-//    @Transient
-//    @Setter(AccessLevel.NONE)
-    @NonNull
-    private String fullName;
-
-    @Past(message = "Date of birth must be in the past.")
-    private LocalDate dateOfBirth;
-
-    @Transient
-    private int age;
-
-    private String location;
-
-    private String phone;
 
     @NonNull
     @Column(length = 100)
@@ -65,6 +45,23 @@ public class User implements UserDetails {
     @Transient
     private String confirmPassword;
 
+    @Past(message = "Date of birth must be in the past.")
+    private LocalDate dateOfBirth;
+
+    @Transient
+    private int age;
+
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "image_id", referencedColumnName = "id")
+    private Image image;
+
+    @OneToOne
+    @JoinColumn(name = "address_id", referencedColumnName = "id")
+    private Address address;
+
+    private String phone;
+    
 //    private String activationCode;
 
     @NonNull
@@ -80,9 +77,6 @@ public class User implements UserDetails {
     )
     private Set<Role> roles = new HashSet<>();
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "image_id", referencedColumnName = "id")
-    private Image image;
 
     @PostLoad
     private void calculateAge() {

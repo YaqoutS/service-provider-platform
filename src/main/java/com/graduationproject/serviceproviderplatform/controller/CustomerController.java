@@ -67,7 +67,7 @@ public class CustomerController {
         updatedCustomer.setFullName(customerDTO.getFullName());
         updatedCustomer.setDateOfBirth(customerDTO.getDateOfBirth());
         updatedCustomer.setImage(customerDTO.getImage());
-        updatedCustomer.setLocation(customerDTO.getLocation());
+        updatedCustomer.setAddress(customerDTO.getAddress());
 
         customerRepository.save(updatedCustomer);
         return ResponseEntity.status(HttpStatus.OK).body("Customer updated successfully");

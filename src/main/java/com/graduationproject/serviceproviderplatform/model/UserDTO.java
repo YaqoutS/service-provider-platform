@@ -21,7 +21,7 @@ public class UserDTO {
 
     private LocalDate dateOfBirth;
 
-    private String location;
+    private Address address;
 
     @NonNull
     private String password;
