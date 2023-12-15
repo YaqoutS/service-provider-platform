@@ -25,17 +25,12 @@ public class Category {
     @JoinColumn(name = "image_id", referencedColumnName = "id")
     private Image image;
 
-    // This will be null if the admin is the one who added this category,
+    // This will be null if the main admin is the one who added this category,
     // and freelancers can add services only to the categories added by the main admin (which company is null)
     @ManyToOne
     private Company company;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "categories_services",
-            joinColumns = @JoinColumn(name = "category_id",referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "service_id",referencedColumnName = "id")
-    )
+    @OneToMany(mappedBy = "category")
     private Set<Service> services = new HashSet<>();
 
     public void addService(Service service) {

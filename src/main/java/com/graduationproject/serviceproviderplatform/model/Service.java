@@ -5,7 +5,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @RequiredArgsConstructor
@@ -28,6 +30,10 @@ public class Service {
     private Image image;
 
     @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @ManyToOne
     private Company company; // If this is null, that means it belong to a freelancer not to a company
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -36,13 +42,10 @@ public class Service {
             joinColumns = @JoinColumn(name = "service_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "employee_id", referencedColumnName = "id")
     )
-    private List<Employee> employees = new ArrayList<>(); // If the service belong to a freelancer, This list will only have one employee
+    private Set<Employee> employees = new HashSet<>(); // If the service belong to a freelancer, This list will only have one employee
 
     private boolean isAvailable;
 
-    @ManyToMany(mappedBy = "services")
-    @JsonIgnore
-    private List<Category> categories = new ArrayList<>();
 
     @NonNull
     private Long avgPrice;
@@ -53,10 +56,6 @@ public class Service {
 
     @OneToMany(mappedBy = "service")
     private List<Request> requests = new ArrayList<>();
-
-    public void addCategory(Category category) {
-        categories.add(category);
-    }
 
     public void addEmployee(Employee employee) {
         employees.add(employee);

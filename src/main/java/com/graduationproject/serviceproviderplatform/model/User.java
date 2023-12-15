@@ -56,6 +56,8 @@ public class User implements UserDetails {
 
     private String location;
 
+    private String phone;
+
     @NonNull
     @Column(length = 100)
     private String password;

@@ -37,10 +37,12 @@ public class Request extends Auditable {
     private Customer customer;
 
     @OneToOne
+    @JoinColumn(name = "feedback_id", referencedColumnName = "id")
     private ServiceFeedback feedback;
 
     @NonNull
-    private String status; //completed inComplete
+    private String status; // suspended completed inComplete
+    // If they employee refused the request, let's delete it immediately
 
     @ElementCollection
     private List<Integer> choices = new ArrayList<>();
