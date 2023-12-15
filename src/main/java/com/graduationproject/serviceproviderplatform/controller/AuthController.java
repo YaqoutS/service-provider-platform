@@ -17,13 +17,21 @@ import java.util.Optional;
 @RestController
 public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+    private AdminRepository adminRepository;
     private UserRepository userRepository;
     private CustomerRepository customerRepository;
     private EmployeeRepository employeeRepository;
     private CompanyRepository companyRepository;
     private RoleRepository roleRepository;
     private PasswordEncoder passwordEncoder;
-    public AuthController(UserRepository userRepository, CustomerRepository customerRepository, EmployeeRepository employeeRepository, CompanyRepository companyRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public AuthController(AdminRepository adminRepository,
+                          UserRepository userRepository,
+                          CustomerRepository customerRepository,
+                          EmployeeRepository employeeRepository,
+                          CompanyRepository companyRepository,
+                          RoleRepository roleRepository,
+                          PasswordEncoder passwordEncoder) {
+        this.adminRepository = adminRepository;
         this.userRepository = userRepository;
         this.customerRepository = customerRepository;
         this.employeeRepository = employeeRepository;
@@ -41,7 +49,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
         }
 
-        Optional<Company> company = companyRepository.findByEmail(userDTO.getEmail());
+        Optional<Company> company = adminRepository.findByEmail(userDTO.getEmail());
         Optional<Customer> customer = customerRepository.findByEmail(userDTO.getEmail());
         Optional<Employee> employee = employeeRepository.findByEmail(userDTO.getEmail());
         Optional<User> user = userRepository.findByEmail(userDTO.getEmail());
@@ -64,38 +72,83 @@ public class AuthController {
         }
     }
 
+    @PostMapping("/register/company")
+    public ResponseEntity<String> register(@Valid @RequestBody CompanyDTO companyDTO, BindingResult bindingResult) {
+        System.out.println("Register Company request!");
+        if (bindingResult.hasErrors()) {
+            System.out.println(bindingResult.getAllErrors());
+            System.out.println("Bad request");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
+        }
+        if(adminRepository.existsByEmail(companyDTO.getEmail())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Email is already in use!");
+        }
+        if(companyRepository.existsByName(companyDTO.getName())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Name is already in use!");
+        }
+//        if(!companyDTO.getPassword().equals(companyDTO.getConfirmPassword())) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password and confirm password don't match");
+//        }
+
+        String secret = passwordEncoder.encode(companyDTO.getPassword());
+        Role adminRole = roleRepository.findByName("ROLE_CADMIN");
+
+        Admin admin = new Admin();
+        admin.addRole(adminRole);
+        admin.setEmail(companyDTO.getEmail());
+        admin.setPassword(secret);
+        admin.setConfirmPassword(secret);
+        admin.setFullName(companyDTO.getName());
+        admin.setEnabled(true);
+
+        Company company = new Company();
+        company.setAdmin(admin);
+        company.setName(companyDTO.getName());
+        company.setImage(companyDTO.getImage());
+        company.setField(companyDTO.getField());
+        company.setDescription(companyDTO.getDescription());
+        company.setPhone(companyDTO.getPhone());
+        company.setLocation(companyDTO.getLocation());
+
+        admin.setCompany(company);
+
+        Company newCompany = companyRepository.save(company);
+        System.out.println(newCompany);
+        return ResponseEntity.ok("Company registered successfully - ");
+    }
+
     private boolean checkPassword(String storedPassword, String enteredPassword) {
         System.out.println("Stored password: " + storedPassword);
         System.out.println("Entered Password: " + enteredPassword);
         return passwordEncoder.matches(enteredPassword, storedPassword);
     }
 
+
     @PostMapping("/register/customer")
-    public ResponseEntity<String> register(@Valid @RequestBody User user, BindingResult bindingResult) {
-        System.out.println("Register user request!");
+    public ResponseEntity<String> register(@Valid @RequestBody Customer customer, BindingResult bindingResult) {
+        System.out.println("Register customer request!");
         if (bindingResult.hasErrors()) {
             System.out.println(bindingResult.getAllErrors());
-            System.out.println("Bad request");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
         }
-        if(userRepository.existsByEmail(user.getEmail())) {
+        if(userRepository.existsByEmail(customer.getEmail())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Email is already in use!");
         }
-        if(userRepository.existsByFullName(user.getFullName())) {
+        if(userRepository.existsByFullName(customer.getFullName())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Name is already in use!");
         }
-        if(!user.getPassword().equals(user.getConfirmPassword())) {
+        if(!customer.getPassword().equals(customer.getConfirmPassword())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password and confirm password don't match");
         }
 
-        Role userRole = roleRepository.findByName("ROLE_CUSTOMER");
-        user.addRole(userRole);
-        String secret = passwordEncoder.encode(user.getPassword());
-        user.setPassword(secret);
-        user.setConfirmPassword(secret);
-        User newUser = userRepository.save(user);
+        Role customerRole = roleRepository.findByName("ROLE_CUSTOMER");
+        customer.addRole(customerRole);
+        String secret = passwordEncoder.encode(customer.getPassword());
+        customer.setPassword(secret);
+        customer.setConfirmPassword(secret);
+        User newUser = userRepository.save(customer);
         System.out.println(newUser);
-        return ResponseEntity.ok("User registered successfully!");
+        return ResponseEntity.ok("Customer registered successfully!");
     }
 
     @PostMapping("/register/employee")

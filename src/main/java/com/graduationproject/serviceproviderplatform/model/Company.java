@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 //Company(id, name, employees, services, email,password, field, description, phone, location, ImagePath)
 @Entity
@@ -20,11 +22,8 @@ public class Company {
     @NonNull
     private String name;
 
-    @NonNull
-    private String email;
-
-    @NonNull
-    private String password;
+    @OneToOne(mappedBy = "company")
+    private Admin admin;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "image_id", referencedColumnName = "id")
@@ -39,13 +38,13 @@ public class Company {
     private String location;
 
     @OneToMany(mappedBy = "company")
-    private List<Category> categories = new ArrayList<>();
+    private Set<Category> categories = new HashSet<>();
 
     @OneToMany(mappedBy = "company")
-    private List<Employee> employees = new ArrayList<>();
+    private Set<Employee> employees = new HashSet<>();
 
     @OneToMany(mappedBy = "company")
-    private List<Service> services = new ArrayList<>();
+    private Set<Service> services = new HashSet<>();
 
     @OneToMany(mappedBy = "company")
     private List<Request> requests = new ArrayList<>();
