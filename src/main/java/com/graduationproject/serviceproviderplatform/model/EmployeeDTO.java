@@ -7,12 +7,10 @@ import lombok.*;
 @Setter
 @ToString
 @NoArgsConstructor
-@RequiredArgsConstructor
 public class EmployeeDTO extends UserDTO {
-    private double rating;
 
-    @NonNull
-    private boolean isAvailable;
+    String companyName;
+    private double rating;
 
     private int yearsOfExperience;
 }

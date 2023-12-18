@@ -41,34 +41,34 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody UserLoginDTO userDTO, BindingResult bindingResult) {
+    public ResponseEntity<UserDTO> login(@Valid @RequestBody UserLoginDTO userDTO, BindingResult bindingResult) {
         System.out.println(userDTO);
         System.out.println("Login request!");
         if (bindingResult.hasErrors()) {
             System.out.println("Bad request");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
-        Optional<Company> company = adminRepository.findByEmail(userDTO.getEmail());
+        Optional<Admin> admin = adminRepository.findByEmail(userDTO.getEmail());
         Optional<Customer> customer = customerRepository.findByEmail(userDTO.getEmail());
         Optional<Employee> employee = employeeRepository.findByEmail(userDTO.getEmail());
         Optional<User> user = userRepository.findByEmail(userDTO.getEmail());
 
-        if (company.isPresent() && checkPassword(user.get().getPassword(), userDTO.getPassword())) {
-            System.out.println("Successful - Admin for company with id: " + company.get().getId());
-            return ResponseEntity.ok("Successful");
+        if (admin.isPresent() && checkPassword(user.get().getPassword(), userDTO.getPassword())) {
+            System.out.println("Successful - Admin for company with id: " + admin.get().getCompany().getId());
+            return ResponseEntity.ok(new UserDTO(admin.get()));
         } else if (customer.isPresent() && checkPassword(customer.get().getPassword(), userDTO.getPassword())) {
             System.out.println("Successful - customer");
-            return ResponseEntity.ok("Successful");
+            return ResponseEntity.ok(new UserDTO(customer.get()));
         } else if (employee.isPresent() && checkPassword(employee.get().getPassword(), userDTO.getPassword())) {
             System.out.println("Successful - employee");
-            return ResponseEntity.ok("Successful");
+            return ResponseEntity.ok(new UserDTO(employee.get()));
         } else if(user.isPresent() && checkPassword(user.get().getPassword(), userDTO.getPassword())) {
             System.out.println("Successful - ADMIN"); // Then this will be the main admin
-            return ResponseEntity.ok("Successful");
+            return ResponseEntity.ok(new UserDTO(user.get()));
         } else {
             System.out.println("Wrong email or password");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Wrong email or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }
 
@@ -80,7 +80,7 @@ public class AuthController {
             System.out.println("Bad request");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
         }
-        if(adminRepository.existsByEmail(companyDTO.getEmail())) {
+        if(userRepository.existsByEmail(companyDTO.getEmail())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Email is already in use!");
         }
         if(companyRepository.existsByName(companyDTO.getName())) {
@@ -93,28 +93,20 @@ public class AuthController {
         String secret = passwordEncoder.encode(companyDTO.getPassword());
         Role adminRole = roleRepository.findByName("ROLE_CADMIN");
 
-        Admin admin = new Admin();
+
+        Admin admin = new Admin(companyDTO.getName(), companyDTO.getEmail(), secret, true, null);
         admin.addRole(adminRole);
-        admin.setEmail(companyDTO.getEmail());
-        admin.setPassword(secret);
         admin.setConfirmPassword(secret);
-        admin.setFullName(companyDTO.getName());
-        admin.setEnabled(true);
+        admin = adminRepository.save(admin);
 
-        Company company = new Company();
+        Company company = new Company(companyDTO);
         company.setAdmin(admin);
-        company.setName(companyDTO.getName());
-        company.setImage(companyDTO.getImage());
-        company.setField(companyDTO.getField());
-        company.setDescription(companyDTO.getDescription());
-        company.setPhone(companyDTO.getPhone());
-        company.setLocation(companyDTO.getLocation());
-
+        company = companyRepository.save(company);
         admin.setCompany(company);
+        adminRepository.save(admin);
 
-        Company newCompany = companyRepository.save(company);
-        System.out.println(newCompany);
-        return ResponseEntity.ok("Company registered successfully - ");
+        System.out.println(company);
+        return ResponseEntity.ok("Company registered successfully - id = " + company.getId());
     }
 
     private boolean checkPassword(String storedPassword, String enteredPassword) {
@@ -146,49 +138,46 @@ public class AuthController {
         String secret = passwordEncoder.encode(customer.getPassword());
         customer.setPassword(secret);
         customer.setConfirmPassword(secret);
-        User newUser = userRepository.save(customer);
-        System.out.println(newUser);
-        return ResponseEntity.ok("Customer registered successfully!");
+        customer.setEnabled(true);
+        customer = customerRepository.save(customer);
+        System.out.println(customer);
+        return ResponseEntity.ok("Customer registered successfully - id = " + customer.getId());
     }
 
     @PostMapping("/register/employee")
-    public ResponseEntity<String> registerNewUser(@Valid @RequestBody Employee employee, BindingResult bindingResult) {
+    public ResponseEntity<String> registerNewUser(@Valid @RequestBody EmployeeDTO employeeDTO, BindingResult bindingResult) {
         System.out.println("Register employee request!");
         if (bindingResult.hasErrors()) {
             //System.out.println(bindingResult.getAllErrors());
             System.out.println("Bad request");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
         }
-        if(userRepository.existsByEmail(employee.getEmail())) {
+        if(userRepository.existsByEmail(employeeDTO.getEmail())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Email is already in use!");
         }
-        if(userRepository.existsByFullName(employee.getFullName())) {
+        if(userRepository.existsByFullName(employeeDTO.getFullName())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Name is already in use!");
         }
+        Company newCompany = null;
+        if(!employeeDTO.getCompanyName().equals("")) {
+            Optional<Company> company = companyRepository.findByName(employeeDTO.getCompanyName());
+            if(company.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no company with the name entered");
+            }
+            newCompany = company.get();
+        }
 
+        Employee employee = new Employee(employeeDTO);
         Role userRole = roleRepository.findByName("ROLE_EMPLOYEE");
         employee.addRole(userRole);
-        String secret = passwordEncoder.encode(employee.getPassword());
+        String secret = passwordEncoder.encode(employeeDTO.getPassword());
         employee.setPassword(secret);
         employee.setConfirmPassword(secret);
-        Employee newEmployee = employeeRepository.save(employee);
-        System.out.println(newEmployee);
-        return ResponseEntity.ok("Employee registered successfully!");
+        employee.setEnabled(newCompany == null ? true : false);
+        employee.setCompany(newCompany);
+        employee = employeeRepository.save(employee);
+        System.out.println(employee);
+        return ResponseEntity.ok("Employee registered successfully - id = " + employee.getId());
     }
-
-//    @GetMapping("/activate/{email}/{activationCode}")
-//    public String activate(@PathVariable String email, @PathVariable String activationCode) {
-//        Optional<User> user = userRepository.findByEmailAndActivationCode(email,activationCode);
-//        if( user.isPresent() ){
-//            User newUser = user.get();
-//            newUser.setEnabled(true);
-//            newUser.setConfirmPassword(newUser.getPassword());
-//            userRepository.save(newUser);
-////            userRepository.sendWelcomeEmail(newUser);
-//            return "auth/activated";
-//        }
-//        return "redirect:/";
-//    }
-
 }
 

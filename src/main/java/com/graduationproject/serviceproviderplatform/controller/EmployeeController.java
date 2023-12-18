@@ -74,7 +74,7 @@ public class EmployeeController {
         updatedEmployee.setAddress(employeeDTO.getAddress());
         updatedEmployee.setImage(employeeDTO.getImage());
         updatedEmployee.setRating(employeeDTO.getRating()); //I think there is no need for this line because the rating will change with every feedback, and it has its own API
-        updatedEmployee.setAvailable(employeeDTO.isAvailable());
+        updatedEmployee.setEnabled(employeeDTO.isEnabled());
         updatedEmployee.setYearsOfExperience(employeeDTO.getYearsOfExperience());
 
         employeeRepository.save(updatedEmployee);

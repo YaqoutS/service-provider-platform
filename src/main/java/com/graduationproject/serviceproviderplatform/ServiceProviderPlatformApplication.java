@@ -21,9 +21,11 @@ public class ServiceProviderPlatformApplication {
     @Bean
     public CommandLineRunner initData(CategoryRepository categoryRepository,
                                       UserRepository userRepository,
+                                      AdminRepository adminRepository,
                                       EmployeeRepository employeeRepository,
-                                      RoleRepository roleRepository,
                                       CustomerRepository customerRepository,
+                                      RoleRepository roleRepository,
+                                      CompanyRepository companyRepository,
                                       PasswordEncoder passwordEncoder) {
         return args -> {
             System.out.println("Inside the command line runner");
@@ -32,25 +34,37 @@ public class ServiceProviderPlatformApplication {
 
             Role administratorRole = new Role("ROLE_ ADMIN"); // This is our main admin
             roleRepository.save(administratorRole);
-            Role adminRole = new Role("ROLE_CADMIN");
-            roleRepository.save(adminRole);
+            Role companyAdminRole = new Role("ROLE_CADMIN");
+            roleRepository.save(companyAdminRole);
             Role customerRole = new Role("ROLE_CUSTOMER");
             roleRepository.save(customerRole);
             Role employeeRole = new Role("ROLE_EMPLOYEE");
             roleRepository.save(employeeRole);
 
-            User admin = new User("admin@gmail.com", "Admin Admin", secret, true);
-            admin.addRole(administratorRole);
-            admin.setConfirmPassword(secret);
-            admin.setDateOfBirth(LocalDate.of(2001, 11, 18));
-            userRepository.save(admin);
+            User mainAdmin = new User("Main Admin", "admin@gmail.com", secret, true);
+            mainAdmin.addRole(administratorRole);
+            mainAdmin.setConfirmPassword(secret);
+            mainAdmin.setDateOfBirth(LocalDate.of(2001, 11, 18));
+            userRepository.save(mainAdmin);
 
-            Customer customer = new Customer("customer@gmail.com", "Customer Customer", secret, true);
+            Company company = new Company("Company 1");
+            Company newCompany = companyRepository.save(company);
+
+            Admin admin = new Admin("company1 admin", "company1@gmail.com", secret, true, newCompany);
+            admin.addRole(companyAdminRole);
+            admin.setConfirmPassword(secret);
+            admin.setCompany(newCompany);
+            Admin newAdmin = adminRepository.save(admin);
+            newCompany.setAdmin(newAdmin);
+            companyRepository.save(newCompany);
+            System.out.println(newCompany);
+
+            Customer customer = new Customer("Customer 1", "customer@gmail.com", secret, true);
             customer.addRole(customerRole);
             customer.setConfirmPassword(secret);
             customerRepository.save(customer);
 
-            Employee employee = new Employee("employee@gmail.com", "Employee Employee", secret, true, true);
+            Employee employee = new Employee("Employee 1", "employee@gmail.com", secret, true);
             employee.addRole(employeeRole);
             employee.setConfirmPassword(secret);
             employeeRepository.save(employee);

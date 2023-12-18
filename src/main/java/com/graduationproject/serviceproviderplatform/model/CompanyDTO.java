@@ -30,5 +30,16 @@ public class CompanyDTO {
 
     private String phone;
 
-    private String location;
+    private Address address;
+
+    public CompanyDTO(Company company) {
+        if(company != null) {
+            this.name = company.getName();
+            this.image = company.getImage();
+            this.field = company.getField();
+            this.description = company.getDescription();
+            this.phone = company.getPhone();
+            this.address = company.getAddress();
+        }
+    }
 }

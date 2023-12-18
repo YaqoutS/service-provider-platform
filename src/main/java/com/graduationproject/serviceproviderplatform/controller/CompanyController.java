@@ -63,7 +63,7 @@ public class CompanyController {
         updatedCompany.setField(company.getField());
         updatedCompany.setDescription(company.getDescription());
         updatedCompany.setPhone(company.getPhone());
-        updatedCompany.setLocation(company.getLocation());
+        updatedCompany.setAddress(company.getAddress());
         companyRepository.save(updatedCompany);
         return ResponseEntity.status(HttpStatus.OK).body("Company updated successfully");
     }

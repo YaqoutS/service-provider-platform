@@ -18,7 +18,7 @@ public class Customer extends User {
     private List<Request> requests = new ArrayList<>();
     @OneToMany(mappedBy = "customer")
     private List<ServiceFeedback> feedbacks = new ArrayList<>();
-    public Customer(String email, String name, String password, boolean enabled) {
-        super(email, name, password, enabled);
+    public Customer(String name, String email, String password, boolean enabled) {
+        super(name, email, password, enabled);
     }
 }

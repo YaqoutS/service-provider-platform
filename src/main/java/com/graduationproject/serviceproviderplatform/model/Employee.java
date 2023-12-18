@@ -15,12 +15,7 @@ import java.util.Set;
 @Setter
 @ToString
 @NoArgsConstructor
-@RequiredArgsConstructor
 public class Employee extends User {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private Long id;
-
     @ManyToMany(mappedBy = "employees")
     @JsonIgnore
     private Set<Service> services = new HashSet<>();
@@ -35,17 +30,20 @@ public class Employee extends User {
 
     private double rating;
 
-    @NonNull
-    private boolean isAvailable;
-
     @ManyToOne
+    @JoinColumn(name = "company_id")
     private Company company; //if it is null, the employee doesn't belong to a company
 
     private int yearsOfExperience;
 
-    public Employee(@NonNull @Size(min = 8, max = 30) String email, @NonNull String fullName, @NonNull String password, @NonNull boolean enabled, @NonNull boolean isAvailable) {
-        super(email, fullName, password, enabled);
-        this.isAvailable = isAvailable;
+    public Employee(@NonNull String fullName, @NonNull @Size(min = 8, max = 30) String email, @NonNull String password, @NonNull boolean enabled) {
+        super(fullName, email, password, enabled);
+    }
+
+    public Employee(EmployeeDTO employeeDTO) {
+        super(employeeDTO.getFullName(), employeeDTO.getEmail(), employeeDTO.getPassword(), false);
+        this.setDateOfBirth(employeeDTO.getDateOfBirth());
+        this.rating = employeeDTO.getRating();
     }
 
     public void addService(Service service) {

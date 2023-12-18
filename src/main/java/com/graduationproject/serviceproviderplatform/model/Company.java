@@ -1,5 +1,6 @@
 package com.graduationproject.serviceproviderplatform.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -22,7 +23,10 @@ public class Company {
     @NonNull
     private String name;
 
-    @OneToOne(mappedBy = "company")
+    @NonNull
+    @OneToOne
+    @JsonIgnore
+    @ToString.Exclude
     private Admin admin;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -35,12 +39,16 @@ public class Company {
 
     private String phone;
 
-    private String location;
+    @OneToOne
+    @JoinColumn(name = "address_id", referencedColumnName = "id")
+    private Address address;
 
     @OneToMany(mappedBy = "company")
     private Set<Category> categories = new HashSet<>();
 
     @OneToMany(mappedBy = "company")
+    @JsonIgnore
+    @ToString.Exclude
     private Set<Employee> employees = new HashSet<>();
 
     @OneToMany(mappedBy = "company")
@@ -48,4 +56,18 @@ public class Company {
 
     @OneToMany(mappedBy = "company")
     private List<Request> requests = new ArrayList<>();
+
+
+    public Company(CompanyDTO companyDTO) {
+        this.name = companyDTO.getName();
+        this.image = companyDTO.getImage();
+        this.field = companyDTO.getField();
+        this.description = companyDTO.getDescription();
+        this.phone = companyDTO.getPhone();
+        this.address = companyDTO.getAddress();
+    }
+
+    public Company(String name) {
+        this.name = name;
+    }
 }
