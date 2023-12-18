@@ -33,6 +33,11 @@ public class Category {
     @OneToMany(mappedBy = "category")
     private Set<Service> services = new HashSet<>();
 
+    public Category(CategoryDTO categoryDTO) {
+        this.name = categoryDTO.getName();
+        this.image = categoryDTO.getImage();
+    }
+
     public void addService(Service service) {
         services.add(service);
     }

@@ -1,8 +1,10 @@
 package com.graduationproject.serviceproviderplatform.controller;
 
 import com.graduationproject.serviceproviderplatform.model.Category;
+import com.graduationproject.serviceproviderplatform.model.CategoryDTO;
 import com.graduationproject.serviceproviderplatform.model.Service;
 import com.graduationproject.serviceproviderplatform.repository.CategoryRepository;
+import com.graduationproject.serviceproviderplatform.repository.CompanyRepository;
 import com.graduationproject.serviceproviderplatform.repository.ServiceRepository;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/categories")
@@ -22,63 +25,74 @@ public class CategoryController {
     private static final Logger logger = LoggerFactory.getLogger(CategoryController.class);
     private CategoryRepository categoryRepository;
     private ServiceRepository serviceRepository;
+    private CompanyRepository companyRepository;
 
-    public CategoryController(CategoryRepository categoryRepository, ServiceRepository serviceRepository) {
+    public CategoryController(CategoryRepository categoryRepository, ServiceRepository serviceRepository, CompanyRepository companyRepository) {
         this.categoryRepository = categoryRepository;
         this.serviceRepository = serviceRepository;
+        this.companyRepository = companyRepository;
     }
 
     @GetMapping
-    public ResponseEntity<List<Category>> getAllCategories() {
-        List<Category> categories = categoryRepository.findAll();
+    public ResponseEntity<List<CategoryDTO>> getAllCategories() {
+        List<CategoryDTO> categories = categoryRepository.findAll()
+                .stream()
+                .map(category -> new CategoryDTO(category))
+                .collect(Collectors.toList());;
         return ResponseEntity.ok(categories);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
+    public ResponseEntity<CategoryDTO> getCategoryById(@PathVariable Long id) {
         Optional<Category> category = categoryRepository.findById(id);
         if (category.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(category.get());
+        return ResponseEntity.status(HttpStatus.OK).body(new CategoryDTO(category.get()));
     }
 
     //@Secured({"ROLE_ADMIN"})
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateCategory(@PathVariable Long id, @Valid @RequestBody Category category, BindingResult bindingResult) {
+    public ResponseEntity<String> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryDTO category, BindingResult bindingResult) {
         if(bindingResult.hasErrors()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
         }
         if(id != category.getId()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The id in the Url is different from the one in the body");
         }
-        if(categoryRepository.existsByName(category.getName())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Name is already in use");
-        }
         Optional<Category> optionalCategory = categoryRepository.findById(id);
         if(optionalCategory.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no category with id = " + category.getId());
         }
+        Optional<Category> existingCategory = categoryRepository.findByName(category.getName());
+        if(existingCategory.isPresent() && existingCategory.get().getId() != id) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Name is already in use");
+        }
         Category updatedCategory = optionalCategory.get();
         updatedCategory.setName(category.getName());
         updatedCategory.setImage(category.getImage());
+        updatedCategory.setCompany(companyRepository.findById(category.getCompanyId()).get());
         categoryRepository.save(updatedCategory);
         return ResponseEntity.status(HttpStatus.OK).body("Category updated successfully");
     }
 
     //@Secured({"ROLE_ADMIN"})
     @PostMapping
-    public ResponseEntity<String> createCategory(@Valid @RequestBody Category category, BindingResult bindingResult) {
-        System.out.println(category);
+    public ResponseEntity<String> createCategory(@Valid @RequestBody CategoryDTO categoryDTO, BindingResult bindingResult) {
+        System.out.println(categoryDTO);
         if(bindingResult.hasErrors()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
         }
-        System.out.println("Category: " + category);
-        if(categoryRepository.findByName(category.getName()).isPresent()) {
+        System.out.println("Category: " + categoryDTO);
+        if(categoryRepository.findByName(categoryDTO.getName()).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Category already exists");
         }
-        Category newCategory = categoryRepository.save(category);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Category created successfully with id = " + newCategory.getId());
+        Category category = new Category(categoryDTO);
+        if (companyRepository.existsById(categoryDTO.getCompanyId())) {
+            category.setCompany(companyRepository.findById(categoryDTO.getCompanyId()).get());
+        }
+        category = categoryRepository.save(category);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Category created successfully with id = " + category.getId());
     }
 
     //@Secured({"ROLE_ADMIN"})
@@ -87,6 +101,11 @@ public class CategoryController {
         if(!categoryRepository.existsById(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no category with id = " + id);
         }
+        Category category = categoryRepository.findById(id).get();
+        for (Service service: category.getServices()) {
+            serviceRepository.delete(service);
+        }
+
         categoryRepository.deleteById(id);
         return ResponseEntity.status(HttpStatus.OK).body("Category deleted successfully");
     }
