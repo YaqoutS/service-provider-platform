@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 @ToString
 @NoArgsConstructor
-public class Request extends Auditable {
+public class Request {
     @Id @GeneratedValue
     private Long id;
 
@@ -22,11 +22,9 @@ public class Request extends Auditable {
     @ManyToOne
     private Service service;
 
-    @Future
-    private LocalDateTime date;
-
-    @ManyToOne
-    private Company company;
+    @NonNull
+    @OneToOne
+    private Appointment appointment;
 
     @NonNull
     @ManyToOne

@@ -21,6 +21,9 @@ public class Service {
     private String name;
 
     @NonNull
+    private int type; // To specify if this service is of type 1 or type 2.
+
+    @NonNull
     private String description;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -57,7 +60,19 @@ public class Service {
     @OneToMany(mappedBy = "service")
     @JsonIgnore
     @ToString.Exclude
+    private List<ServiceInput> serviceInputs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "service")
+    @JsonIgnore
+    @ToString.Exclude
     private List<Request> requests = new ArrayList<>();
+
+    public List<Appointment> getAppointments() {
+        return requests.stream()
+                .map(Request::getAppointment)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
 
     public void addEmployee(Employee employee) {
         employees.add(employee);
