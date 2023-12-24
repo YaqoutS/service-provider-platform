@@ -12,7 +12,7 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 public class Admin extends User {
-    @ManyToOne
+    @OneToOne
 //    @JoinColumn(name = "company_id", unique = true)
     private Company company;
 

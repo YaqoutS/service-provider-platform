@@ -32,7 +32,7 @@ public class ServiceProviderPlatformApplication {
 
             String secret = passwordEncoder.encode("123456");
 
-            Role administratorRole = new Role("ROLE_ ADMIN"); // This is our main admin
+            Role administratorRole = new Role("ROLE_ADMIN"); // This is our main admin
             roleRepository.save(administratorRole);
             Role companyAdminRole = new Role("ROLE_CADMIN");
             roleRepository.save(companyAdminRole);
@@ -50,12 +50,12 @@ public class ServiceProviderPlatformApplication {
             Company company = new Company("Company 1");
             Company newCompany = companyRepository.save(company);
 
-            Admin admin = new Admin("company1 admin", "company1@gmail.com", secret, true, newCompany);
+            Admin admin = new Admin("company 1", "company1@gmail.com", secret, true, newCompany);
             admin.addRole(companyAdminRole);
             admin.setConfirmPassword(secret);
             admin.setCompany(newCompany);
             Admin newAdmin = adminRepository.save(admin);
-            newCompany.setAdmin(newAdmin);
+//            newCompany.setAdmin(newAdmin);
             companyRepository.save(newCompany);
             System.out.println(newCompany);
 

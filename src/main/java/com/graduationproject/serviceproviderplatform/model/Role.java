@@ -17,7 +17,6 @@ import java.util.Set;
 @ToString
 @NoArgsConstructor
 public class Role {
-
     @Id
     @GeneratedValue
     private Long id;
@@ -29,5 +28,4 @@ public class Role {
     @ManyToMany(mappedBy = "roles")
     @JsonIgnore
     private Set<User> users = new HashSet<>();
-
 }

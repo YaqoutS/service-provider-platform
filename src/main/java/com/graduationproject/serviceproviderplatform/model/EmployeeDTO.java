@@ -8,8 +8,8 @@ import lombok.*;
 @ToString
 @NoArgsConstructor
 public class EmployeeDTO extends UserDTO {
-
     String companyName;
+
     private double rating;
 
     private int yearsOfExperience;

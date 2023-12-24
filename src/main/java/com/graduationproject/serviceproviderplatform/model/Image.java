@@ -10,7 +10,6 @@ import lombok.*;
 @Setter
 @ToString
 public class Image {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

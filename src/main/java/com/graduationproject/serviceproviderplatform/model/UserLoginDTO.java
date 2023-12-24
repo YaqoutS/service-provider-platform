@@ -13,6 +13,7 @@ import lombok.ToString;
 public class UserLoginDTO {
     @NonNull @NotEmpty @Email
     private String email;
+
     @NonNull @NotEmpty
     private String password;
 }
