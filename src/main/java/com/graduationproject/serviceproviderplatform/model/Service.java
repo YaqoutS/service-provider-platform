@@ -4,10 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @RequiredArgsConstructor
@@ -33,8 +31,8 @@ public class Service {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @ManyToOne
-    private Company company; // If this is null, that means it belong to a freelancer not to a company
+//    @ManyToOne
+//    private Company company; // If this is null, that means it belong to a freelancer not to a company
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -46,12 +44,10 @@ public class Service {
 
     private boolean isAvailable;
 
-
     @NonNull
     private Long avgPrice;
 
     @OneToMany(mappedBy = "service")
-    //@NonNull
     private List<ServiceOption> serviceOptions = new ArrayList<>();
 
     @OneToMany(mappedBy = "service")
@@ -59,5 +55,9 @@ public class Service {
 
     public void addEmployee(Employee employee) {
         employees.add(employee);
+    }
+
+    public void removeEmployee(Employee employee) {
+        employees.remove(employee);
     }
 }

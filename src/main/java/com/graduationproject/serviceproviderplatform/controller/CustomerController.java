@@ -3,6 +3,7 @@ package com.graduationproject.serviceproviderplatform.controller;
 import com.graduationproject.serviceproviderplatform.model.*;
 import com.graduationproject.serviceproviderplatform.repository.CustomerRepository;
 import com.graduationproject.serviceproviderplatform.repository.UserRepository;
+import com.graduationproject.serviceproviderplatform.service.CustomerService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +20,12 @@ import java.util.Optional;
 public class CustomerController {
     private UserRepository userRepository;
     private CustomerRepository customerRepository;
+    private CustomerService customerService;
 
-    public CustomerController(UserRepository userRepository, CustomerRepository customerRepository) {
+    public CustomerController(UserRepository userRepository, CustomerRepository customerRepository, CustomerService customerService) {
         this.userRepository = userRepository;
         this.customerRepository = customerRepository;
+        this.customerService = customerService;
     }
 
     @GetMapping
@@ -76,8 +79,11 @@ public class CustomerController {
     //@Secured({"ROLE_ADMIN", "ROLE_EMPLOYEE"})
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
-        if(customerRepository.findById(id).isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no customer with id = " + id);
-        customerRepository.deleteById(id);
+        Optional<Customer> customer = customerRepository.findById(id);
+        if(customer.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no customer with id = " + id);
+        }
+        customerService.delete(customer.get());
         return ResponseEntity.status(HttpStatus.OK).body("Customer deleted successfully");
     }
 

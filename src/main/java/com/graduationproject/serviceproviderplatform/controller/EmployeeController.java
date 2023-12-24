@@ -4,6 +4,7 @@ import com.graduationproject.serviceproviderplatform.model.*;
 import com.graduationproject.serviceproviderplatform.repository.EmployeeRepository;
 import com.graduationproject.serviceproviderplatform.repository.ServiceRepository;
 import com.graduationproject.serviceproviderplatform.repository.UserRepository;
+import com.graduationproject.serviceproviderplatform.service.EmployeeService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,11 +23,13 @@ import java.util.Optional;
 public class EmployeeController {
     private static final Logger logger = LoggerFactory.getLogger(EmployeeController.class);
     private EmployeeRepository employeeRepository;
+    private EmployeeService employeeService;
     private UserRepository userRepository;
     private ServiceRepository serviceRepository;
 
-    public EmployeeController(EmployeeRepository employeeRepository, UserRepository userRepository, ServiceRepository serviceRepository) {
+    public EmployeeController(EmployeeRepository employeeRepository, EmployeeService employeeService, UserRepository userRepository, ServiceRepository serviceRepository) {
         this.employeeRepository = employeeRepository;
+        this.employeeService = employeeService;
         this.userRepository = userRepository;
         this.serviceRepository = serviceRepository;
     }
@@ -44,7 +47,9 @@ public class EmployeeController {
         if(employee.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-        return ResponseEntity.status(HttpStatus.OK).body(employee.get());
+        Employee employee1 = employee.get();
+        employee1.setCompanyName(employee1.getCompany() == null? null : employee1.getCompany().getName());
+        return ResponseEntity.status(HttpStatus.OK).body(employee1);
     }
 
     //@Secured({"ROLE_EMPLOYEE"})
@@ -84,8 +89,11 @@ public class EmployeeController {
     //@Secured({"ROLE_ADMIN", "ROLE_EMPLOYEE"})
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteEmployee(@PathVariable Long id) {
-        if(employeeRepository.findById(id).isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no employee with id = " + id);
-        employeeRepository.deleteById(id);
+        Optional<Employee> employee = employeeRepository.findById(id);
+        if(employee.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no employee with id = " + id);
+        }
+        employeeService.delete(employee.get());
         return ResponseEntity.status(HttpStatus.OK).body("Employee deleted successfully");
     }
 

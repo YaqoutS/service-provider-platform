@@ -5,6 +5,7 @@ import com.graduationproject.serviceproviderplatform.model.Company;
 import com.graduationproject.serviceproviderplatform.model.Employee;
 import com.graduationproject.serviceproviderplatform.model.Request;
 import com.graduationproject.serviceproviderplatform.repository.CompanyRepository;
+import com.graduationproject.serviceproviderplatform.service.CompanyService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +21,11 @@ import java.util.Set;
 @CrossOrigin
 public class CompanyController {
     private CompanyRepository companyRepository;
+    private CompanyService companyService;
 
-    public CompanyController(CompanyRepository companyRepository) {
+    public CompanyController(CompanyRepository companyRepository, CompanyService companyService) {
         this.companyRepository = companyRepository;
+        this.companyService = companyService;
     }
 
     @GetMapping
@@ -84,10 +87,11 @@ public class CompanyController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCompany(@PathVariable Long id) {
-        if(!companyRepository.existsById(id)) {
+        Optional<Company> company = companyRepository.findById(id);
+        if(company.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no company with id = " + id);
         }
-        companyRepository.deleteById(id);
+        companyService.delete(company.get());
         return ResponseEntity.status(HttpStatus.OK).body("Company deleted successfully");
     }
 
@@ -100,14 +104,14 @@ public class CompanyController {
         return ResponseEntity.status(HttpStatus.OK).body(company.get().getEmployees());
     }
 
-    @GetMapping("/{id}/requests")
-    public ResponseEntity<List<Request>> getCompanyRequests(@PathVariable Long id) {
-        if(!companyRepository.existsById(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-        Company company = companyRepository.findById(id).get();
-        return ResponseEntity.status(HttpStatus.OK).body(company.getRequests());
-    }
+//    @GetMapping("/{id}/requests")
+//    public ResponseEntity<List<Request>> getCompanyRequests(@PathVariable Long id) {
+//        if(!companyRepository.existsById(id)) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+//        }
+//        Company company = companyRepository.findById(id).get();
+//        return ResponseEntity.status(HttpStatus.OK).body(company.getRequests());
+//    }
 
     @GetMapping("/{id}/categories")
     public ResponseEntity<Set<Category>> getCompanyCategories(@PathVariable Long id) {
