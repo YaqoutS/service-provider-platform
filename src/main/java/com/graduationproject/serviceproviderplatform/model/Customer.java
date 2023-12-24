@@ -1,5 +1,6 @@
 package com.graduationproject.serviceproviderplatform.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.OneToMany;
 import lombok.*;
@@ -13,11 +14,16 @@ import java.util.List;
 @ToString
 @NoArgsConstructor
 public class Customer extends User {
+    @OneToMany(mappedBy = "customer")
+    @JsonIgnore
+    @ToString.Exclude
+    private List<Request> requests = new ArrayList<>();
 
     @OneToMany(mappedBy = "customer")
-    private List<Request> requests = new ArrayList<>();
-    @OneToMany(mappedBy = "customer")
+    @JsonIgnore
+    @ToString.Exclude
     private List<ServiceFeedback> feedbacks = new ArrayList<>();
+
     public Customer(String name, String email, String password, boolean enabled) {
         super(name, email, password, enabled);
     }

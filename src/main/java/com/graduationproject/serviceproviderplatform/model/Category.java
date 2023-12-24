@@ -1,5 +1,6 @@
 package com.graduationproject.serviceproviderplatform.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,6 +32,8 @@ public class Category {
     private Company company;
 
     @OneToMany(mappedBy = "category")
+    @JsonIgnore
+    @ToString.Exclude
     private Set<Service> services = new HashSet<>();
 
     public Category(CategoryDTO categoryDTO) {

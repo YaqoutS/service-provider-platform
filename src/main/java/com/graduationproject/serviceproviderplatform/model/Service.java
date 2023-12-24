@@ -35,6 +35,8 @@ public class Service {
 //    private Company company; // If this is null, that means it belong to a freelancer not to a company
 
     @ManyToMany(fetch = FetchType.EAGER)
+    @JsonIgnore
+    @ToString.Exclude
     @JoinTable(
             name = "employee_services",
             joinColumns = @JoinColumn(name = "service_id", referencedColumnName = "id"),
@@ -48,9 +50,13 @@ public class Service {
     private Long avgPrice;
 
     @OneToMany(mappedBy = "service")
+    @JsonIgnore
+    @ToString.Exclude
     private List<ServiceOption> serviceOptions = new ArrayList<>();
 
     @OneToMany(mappedBy = "service")
+    @JsonIgnore
+    @ToString.Exclude
     private List<Request> requests = new ArrayList<>();
 
     public void addEmployee(Employee employee) {
