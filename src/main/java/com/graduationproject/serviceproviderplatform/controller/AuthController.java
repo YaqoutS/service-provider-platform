@@ -100,7 +100,7 @@ public class AuthController {
         admin = adminRepository.save(admin);
 
         Company company = new Company(companyDTO);
-        company.setAdmin(admin);
+//        company.setAdmin(admin);
         company = companyRepository.save(company);
         admin.setCompany(company);
         adminRepository.save(admin);
@@ -145,38 +145,40 @@ public class AuthController {
     }
 
     @PostMapping("/register/employee")
-    public ResponseEntity<String> registerNewUser(@Valid @RequestBody EmployeeDTO employeeDTO, BindingResult bindingResult) {
+    public ResponseEntity<String> registerNewUser(@Valid @RequestBody Employee employee, BindingResult bindingResult) {
         System.out.println("Register employee request!");
+        System.out.println(employee);
         if (bindingResult.hasErrors()) {
             //System.out.println(bindingResult.getAllErrors());
             System.out.println("Bad request");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
         }
-        if(userRepository.existsByEmail(employeeDTO.getEmail())) {
+        if(userRepository.existsByEmail(employee.getEmail())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Email is already in use!");
         }
-        if(userRepository.existsByFullName(employeeDTO.getFullName())) {
+        if(userRepository.existsByFullName(employee.getFullName())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Name is already in use!");
         }
         Company newCompany = null;
-        if(!employeeDTO.getCompanyName().equals("")) {
-            Optional<Company> company = companyRepository.findByName(employeeDTO.getCompanyName());
+        if(employee.getCompanyName() != null && !employee.getCompanyName().equals("")) {
+            Optional<Company> company = companyRepository.findByName(employee.getCompanyName());
             if(company.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no company with the name entered");
             }
             newCompany = company.get();
         }
 
-        Employee employee = new Employee(employeeDTO);
-        Role userRole = roleRepository.findByName("ROLE_EMPLOYEE");
-        employee.addRole(userRole);
-        String secret = passwordEncoder.encode(employeeDTO.getPassword());
+        employee.setCompany(newCompany);
+        Role employeeRole = roleRepository.findByName("ROLE_EMPLOYEE");
+        employee.addRole(employeeRole);
+        String secret = passwordEncoder.encode(employee.getPassword());
         employee.setPassword(secret);
         employee.setConfirmPassword(secret);
         employee.setEnabled(newCompany == null ? true : false);
-        employee.setCompany(newCompany);
         employee = employeeRepository.save(employee);
         System.out.println(employee);
+
+        // We also need to send a notification to the company to ensure that this employee belong to it to make him available.
         return ResponseEntity.ok("Employee registered successfully - id = " + employee.getId());
     }
 }

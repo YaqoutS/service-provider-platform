@@ -1,13 +1,8 @@
 package com.graduationproject.serviceproviderplatform.model;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -85,7 +80,7 @@ public class UserDTO {
             this.dateOfBirth = user.getDateOfBirth();
             this.address = user.getAddress();
 //        this.password = user.getPassword();
-            this.role = "ROLE_ADMIN";
+            this.role = user.getRoles().iterator().next().getName();
             this.enabled = user.isEnabled();
         }
     }
