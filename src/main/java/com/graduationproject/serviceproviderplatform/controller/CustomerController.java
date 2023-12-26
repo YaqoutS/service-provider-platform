@@ -29,14 +29,14 @@ public class CustomerController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Customer>> getAllUsers() {
+    public ResponseEntity<List<Customer>> getAllCustomers() {
         List<Customer> customers = customerRepository.findAll();
         System.out.println("Customers: " + customers);
         return ResponseEntity.status(HttpStatus.OK).body(customers);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getUser(@PathVariable Long id) {
+    public ResponseEntity<Customer> getCustomer(@PathVariable Long id) {
         System.out.println("Inside get customer");
         Optional<Customer> customer = customerRepository.findById(id);
         if(customer.isEmpty()) {
@@ -48,7 +48,7 @@ public class CustomerController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateUser(@PathVariable Long id, @Valid @RequestBody UserDTO customerDTO, BindingResult bindingResult) {
+    public ResponseEntity<String> updateCustomer(@PathVariable Long id, @Valid @RequestBody UserDTO customerDTO, BindingResult bindingResult) {
         System.out.println("Inside update Customer");
         if (bindingResult.hasErrors()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
@@ -78,7 +78,7 @@ public class CustomerController {
 
     //@Secured({"ROLE_ADMIN", "ROLE_EMPLOYEE"})
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<String> deleteCustomer(@PathVariable Long id) {
         Optional<Customer> customer = customerRepository.findById(id);
         if(customer.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no customer with id = " + id);
@@ -88,7 +88,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}/requests")
-    public ResponseEntity<List<Request>> getUserRequests(@PathVariable Long id) {
+    public ResponseEntity<List<Request>> getCustomerRequests(@PathVariable Long id) {
         if(!customerRepository.existsById(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
@@ -115,4 +115,13 @@ public class CustomerController {
         }
         return ResponseEntity.status(HttpStatus.OK).body(incompleteRequests);
     }
+
+    //    @GetMapping("/{id}/feedbacks")
+//    public ResponseEntity<List<ServiceFeedback>> getCustomerFeedbacks(@PathVariable Long id) {
+//        if(!customerRepository.existsById(id)) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+//        }
+//        List<ServiceFeedback> feedbacks = customerRepository.findById(id).get().getFeedbacks();
+//        return ResponseEntity.ok(feedbacks);
+//    }
 }

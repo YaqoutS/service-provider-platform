@@ -1,13 +1,10 @@
 package com.graduationproject.serviceproviderplatform.controller;
 
-import com.graduationproject.serviceproviderplatform.model.Category;
-import com.graduationproject.serviceproviderplatform.model.CategoryDTO;
 import com.graduationproject.serviceproviderplatform.model.Request;
 import com.graduationproject.serviceproviderplatform.model.RequestDTO;
-import com.graduationproject.serviceproviderplatform.repository.CustomerRepository;
-import com.graduationproject.serviceproviderplatform.repository.EmployeeRepository;
-import com.graduationproject.serviceproviderplatform.repository.RequestRepository;
-import com.graduationproject.serviceproviderplatform.repository.ServiceRepository;
+import com.graduationproject.serviceproviderplatform.model.ServiceFeedback;
+import com.graduationproject.serviceproviderplatform.repository.*;
+import com.graduationproject.serviceproviderplatform.service.FeedbackService;
 import com.graduationproject.serviceproviderplatform.service.RequestService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -15,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,13 +24,17 @@ public class RequestController {
     private ServiceRepository serviceRepository;
     private EmployeeRepository employeeRepository;
     private CustomerRepository customerRepository;
+    private ServiceFeedbackRepository feedbackRepository;
+    private FeedbackService feedbackService;
 
-    public RequestController(RequestRepository requestRepository, RequestService requestService, ServiceRepository serviceRepository, EmployeeRepository employeeRepository, CustomerRepository customerRepository) {
+    public RequestController(RequestRepository requestRepository, RequestService requestService, ServiceRepository serviceRepository, EmployeeRepository employeeRepository, CustomerRepository customerRepository, ServiceFeedbackRepository feedbackRepository, FeedbackService feedbackService) {
         this.requestRepository = requestRepository;
         this.requestService = requestService;
         this.serviceRepository = serviceRepository;
         this.employeeRepository = employeeRepository;
         this.customerRepository = customerRepository;
+        this.feedbackRepository = feedbackRepository;
+        this.feedbackService = feedbackService;
     }
 
     @GetMapping
@@ -86,7 +86,7 @@ public class RequestController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateCategory(@PathVariable Long id, @Valid @RequestBody RequestDTO requestDTO, BindingResult bindingResult) {
+    public ResponseEntity<String> updateRequest(@PathVariable Long id, @Valid @RequestBody RequestDTO requestDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
         }
@@ -117,18 +117,24 @@ public class RequestController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no employee with id = " + requestDTO.getEmployeeId());
         }
 
-        // Update feedback
-        if(requestDTO.getFeedback() == null) {
-            updatedRequest.setFeedback(null);
-        } else if(updatedRequest.getFeedback() == null) {
-            updatedRequest.setFeedback(requestDTO.getFeedback());
-        } else {
-            updatedRequest.getFeedback().setRating(requestDTO.getFeedback().getRating());
-            updatedRequest.getFeedback().setDescription(requestDTO.getFeedback().getDescription());
-            updatedRequest.getFeedback().setDate(requestDTO.getFeedback().getDate());
-            updatedRequest.getFeedback().setCustomer(updatedRequest.getCustomer());
-            updatedRequest.getFeedback().setEmployee(updatedRequest.getEmployee());
-        }
+//        // Update feedback
+//        if (updatedRequest.getAppointment() == null && requestDTO.getAppointment() == null) {
+//            updatedRequest.setAppointment(null);
+//        } else if (updatedRequest.getFeedback() == null) {
+//            updatedRequest.setFeedback(requestDTO.getFeedback());
+//            updatedRequest.getFeedback().setCustomer(updatedRequest.getCustomer());
+//            updatedRequest.getFeedback().setEmployee(updatedRequest.getEmployee());
+//            System.out.println(1);
+//        } else if(requestDTO.getFeedback() == null) {
+//            System.out.println(2);
+//            feedbackService.delete(updatedRequest.getFeedback());
+//            updatedRequest.setFeedback(null);
+//        } else {
+//            System.out.println(3);
+//            updatedRequest.getFeedback().setRating(requestDTO.getFeedback().getRating());
+//            updatedRequest.getFeedback().setDescription(requestDTO.getFeedback().getDescription());
+//            updatedRequest.getFeedback().setDate(requestDTO.getFeedback().getDate());
+//        }
 
         requestRepository.save(updatedRequest);
         return ResponseEntity.status(HttpStatus.OK).body("Request updated successfully");
@@ -142,5 +148,62 @@ public class RequestController {
         Request request = requestRepository.findById(id).get();
         requestService.delete(request);
         return ResponseEntity.status(HttpStatus.OK).body("Request deleted successfully");
+    }
+
+    // ###################################### Feedback endpoints ###################################### //
+
+    @PostMapping("/{requestId}/feedback")
+    public ResponseEntity<String> createFeedback(@PathVariable Long requestId, @Valid @RequestBody ServiceFeedback feedback, BindingResult bindingResult) {
+        System.out.println(feedback);
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
+        }
+        if (!requestRepository.existsById(requestId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no request with id = " + requestId);
+        }
+        Request request = requestRepository.findById(requestId).get();
+
+        feedback.setEmployee(request.getEmployee());
+        feedback.setCustomer(request.getCustomer());
+
+        feedback = feedbackRepository.save(feedback);
+        request.setFeedback(feedback);
+        requestRepository.save(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body("Feedback added successfully with id = " + feedback.getId());
+    }
+
+    @PutMapping("/{requestId}/feedback/{feedbackId}")
+    public ResponseEntity<String> updateFeedback(@PathVariable Long requestId, @PathVariable Long feedbackId, @Valid @RequestBody ServiceFeedback feedback, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
+        }
+        if (!requestRepository.existsById(requestId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no request with id = " + requestId);
+        }
+        if (!feedbackRepository.existsById(feedbackId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no feedback with id = " + feedbackId);
+        }
+        ServiceFeedback updatedFeedback = feedbackRepository.findById(feedbackId).get();
+        updatedFeedback.setRating(feedback.getRating());
+        updatedFeedback.setDescription(feedback.getDescription());
+        updatedFeedback.setDate(feedback.getDate());
+
+        feedbackRepository.save(updatedFeedback);
+        return ResponseEntity.status(HttpStatus.OK).body("Feedback updated successfully");
+    }
+
+    @DeleteMapping("/{requestId}/feedback/{feedbackId}")
+    public ResponseEntity<String> deleteFeedback(@PathVariable Long requestId, @PathVariable Long feedbackId) {
+        if (!requestRepository.existsById(requestId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no request with id = " + requestId);
+        }
+        if (!feedbackRepository.existsById(feedbackId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no feedback with id = " + feedbackId);
+        }
+        Request request = requestRepository.findById(requestId).get();
+        ServiceFeedback feedback = feedbackRepository.findById(feedbackId).get();
+        request.setFeedback(null);
+        feedbackService.delete(feedback);
+        return ResponseEntity.status(HttpStatus.OK).body("Feedback deleted successfully");
     }
 }
