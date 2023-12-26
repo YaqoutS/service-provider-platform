@@ -1,5 +1,6 @@
 package com.graduationproject.serviceproviderplatform.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.graduationproject.serviceproviderplatform.model.validator.PasswordMatch;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Past;
@@ -40,9 +41,13 @@ public class User {
 
     @NonNull
     @Column(length = 100)
+    @JsonIgnore
+    @ToString.Exclude
     private String password;
 
     @Transient
+    @JsonIgnore
+    @ToString.Exclude
     private String confirmPassword;
 
     @Past(message = "Date of birth must be in the past.")

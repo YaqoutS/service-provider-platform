@@ -60,7 +60,6 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.OK).body(new CategoryDTO(category.get()));
     }
 
-    //@Secured({"ROLE_ADMIN"})
     @PutMapping("/{id}")
     public ResponseEntity<String> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryDTO category, BindingResult bindingResult) {
         if(bindingResult.hasErrors()) {
@@ -85,7 +84,6 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.OK).body("Category updated successfully");
     }
 
-    //@Secured({"ROLE_ADMIN"})
     @PostMapping
     public ResponseEntity<String> createCategory(@Valid @RequestBody CategoryDTO categoryDTO, BindingResult bindingResult) {
         System.out.println(categoryDTO);
@@ -157,7 +155,7 @@ public class CategoryController {
         service.setCategory(updatedCategory);
         updatedCategory.addService(newService);
         categoryRepository.save(updatedCategory);
-        return ResponseEntity.status(HttpStatus.OK).body("Service added successfully");
+        return ResponseEntity.status(HttpStatus.OK).body("Service added successfully with id = " + newService.getId());
     }
 
     @PutMapping("/{categoryId}/services/{serviceId}")
@@ -204,8 +202,8 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.OK).body("Service deleted successfully");
     }
 
-    @GetMapping("/{categoryId}/services/{serviceId}/available-days")
-    public ResponseEntity<List<LocalDate>> getAvailableDates(@PathVariable Long categoryId, @PathVariable Long serviceId) {
+    @GetMapping("/{categoryId}/services/{serviceId}/unavailable-dates")
+    public ResponseEntity<List<LocalDate>> getUnavailableDates(@PathVariable Long categoryId, @PathVariable Long serviceId) {
         if(!categoryRepository.existsById(categoryId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
@@ -218,16 +216,16 @@ public class CategoryController {
         Map<LocalDate, Long> appointmentsByDate = appointments.stream()
                 .collect(Collectors.groupingBy(Appointment::getStartDate, Collectors.counting()));
 
-        // Filter dates where all slots are reserved (assuming 5 slots per day)
+        // Filter dates where all slots are reserved (assuming 10 slots per day)
         List<LocalDate> unavailableDays = appointmentsByDate.entrySet().stream()
-                .filter(entry -> entry.getValue() >= 5)
+                .filter(entry -> getAvailableTimes(serviceId, entry.getKey()).size() == 0  )
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
         return ResponseEntity.status(HttpStatus.OK).body(unavailableDays);
     }
 
-    @GetMapping("/{categoryId}/services/{serviceId}/available-days/{date}")
+    @GetMapping("/{categoryId}/services/{serviceId}/available-times/{date}")
     public ResponseEntity<List<LocalTime>> getAvailableTimes(@PathVariable Long categoryId, @PathVariable Long serviceId, @PathVariable LocalDate date) {
         if(!categoryRepository.existsById(categoryId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -236,17 +234,22 @@ public class CategoryController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        // Fetch all appointments for the given service and date
-//        List<Appointment> appointments = appointmentRepository.findByServiceIdAndStartDate(serviceId, date);
+        List<LocalTime> availableTimes = getAvailableTimes(serviceId, date);
+
+        return ResponseEntity.status(HttpStatus.OK).body(availableTimes);
+    }
+
+    private List<LocalTime> getAvailableTimes(Long serviceId, LocalDate date) {
+        // I think this will be called in the previous two APIs ...
         List<Appointment> appointments = serviceRepository.findById(serviceId).get().getAppointments()
                 .stream().filter(a -> a.getStartDate().equals(date)).toList();
 
-        // Create a set of all possible time slots for the day (assuming 2-hour slots from 8am to 6pm)
+        // Create a set of all possible time slots for the day (assuming 1-hour slots from 8am to 6pm)
         Set<LocalTime> allTimeSlots = new HashSet<>();
         LocalTime currentTime = LocalTime.of(8, 0);
         while (currentTime.isBefore(LocalTime.of(18, 0))) {
             allTimeSlots.add(currentTime);
-            currentTime = currentTime.plusHours(2);
+            currentTime = currentTime.plusHours(1);
         }
 
         // Remove reserved time slots
@@ -255,16 +258,15 @@ public class CategoryController {
             LocalTime endTime = appointment.getEndTime();
 
             // Remove all time slots between start and end time
-            while (!startTime.isAfter(endTime)) {
+            while (startTime.isBefore(endTime)) {
                 allTimeSlots.remove(startTime);
-                startTime = startTime.plusHours(2);
+                startTime = startTime.plusHours(1);
             }
         });
 
         // Convert the set of available time slots to a sorted list
         List<LocalTime> availableTimes = new ArrayList<>(allTimeSlots);
         Collections.sort(availableTimes);
-
-        return ResponseEntity.status(HttpStatus.OK).body(availableTimes);
+        return availableTimes;
     }
 }

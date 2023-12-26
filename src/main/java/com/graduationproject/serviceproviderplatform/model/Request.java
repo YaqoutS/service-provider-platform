@@ -1,10 +1,8 @@
 package com.graduationproject.serviceproviderplatform.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Future;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,10 +21,9 @@ public class Request {
     private Service service;
 
     @NonNull
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     private Appointment appointment;
 
-    @NonNull
     @ManyToOne
     private Employee employee;
 
@@ -34,14 +31,21 @@ public class Request {
     @ManyToOne
     private Customer customer;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "feedback_id", referencedColumnName = "id")
     private ServiceFeedback feedback;
 
     @NonNull
     private String status; // suspended completed inComplete
-    // If they employee refused the request, let's delete it immediately
+    // If the employee refuses the request, let's delete it immediately
 
     @ElementCollection
     private List<Integer> choices = new ArrayList<>();
+
+    public Request(RequestDTO requestDTO) {
+        this.appointment = requestDTO.getAppointment();
+        this.feedback = requestDTO.getFeedback();
+        this.status = requestDTO.getStatus();
+        this.choices = requestDTO.getChoices();
+    }
 }

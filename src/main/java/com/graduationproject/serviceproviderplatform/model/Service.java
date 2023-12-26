@@ -34,9 +34,6 @@ public class Service {
     @JoinColumn(name = "category_id")
     private Category category;
 
-//    @ManyToOne
-//    private Company company; // If this is null, that means it belong to a freelancer not to a company
-
     @ManyToMany(fetch = FetchType.EAGER)
     @JsonIgnore
     @ToString.Exclude
@@ -67,6 +64,7 @@ public class Service {
     @ToString.Exclude
     private List<Request> requests = new ArrayList<>();
 
+    @JsonIgnore
     public List<Appointment> getAppointments() {
         return requests.stream()
                 .map(Request::getAppointment)
