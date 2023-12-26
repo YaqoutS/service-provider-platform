@@ -49,17 +49,17 @@ public class Service {
     @NonNull
     private Long avgPrice;
 
-    @OneToMany(mappedBy = "service")
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL)
     @JsonIgnore
     @ToString.Exclude
     private List<ServiceOption> serviceOptions = new ArrayList<>();
 
-    @OneToMany(mappedBy = "service")
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL)
     @JsonIgnore
     @ToString.Exclude
     private List<ServiceInput> serviceInputs = new ArrayList<>();
 
-    @OneToMany(mappedBy = "service")
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL)
     @JsonIgnore
     @ToString.Exclude
     private List<Request> requests = new ArrayList<>();

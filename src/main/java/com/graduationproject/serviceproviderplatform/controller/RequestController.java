@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -95,10 +96,19 @@ public class RequestController {
         }
 
         Request updatedRequest = optionalRequest.get();
-        updatedRequest.setAppointment(requestDTO.getAppointment());
-        updatedRequest.setFeedback(requestDTO.getFeedback());
         updatedRequest.setStatus(requestDTO.getStatus());
-        updatedRequest.setChoices(requestDTO.getChoices());
+        updatedRequest.setChoices(requestDTO.getChoices()); // Should we allow the customer to change them?
+
+        // Update the appointment
+        if(updatedRequest.getAppointment() != null && requestDTO.getAppointment() != null) {
+            updatedRequest.getAppointment().setStartDate(requestDTO.getAppointment().getStartDate());
+            updatedRequest.getAppointment().setEndDate(requestDTO.getAppointment().getEndDate());
+            updatedRequest.getAppointment().setStartTime(requestDTO.getAppointment().getStartTime());
+            updatedRequest.getAppointment().setEndTime(requestDTO.getAppointment().getEndTime());
+            // The address can't be changed
+        }
+
+        // Update the employee
         if (requestDTO.getEmployeeId() == null) {
             updatedRequest.setEmployee(null);
         } else if (employeeRepository.existsById(requestDTO.getEmployeeId())) {
@@ -106,6 +116,20 @@ public class RequestController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no employee with id = " + requestDTO.getEmployeeId());
         }
+
+        // Update feedback
+        if(requestDTO.getFeedback() == null) {
+            updatedRequest.setFeedback(null);
+        } else if(updatedRequest.getFeedback() == null) {
+            updatedRequest.setFeedback(requestDTO.getFeedback());
+        } else {
+            updatedRequest.getFeedback().setRating(requestDTO.getFeedback().getRating());
+            updatedRequest.getFeedback().setDescription(requestDTO.getFeedback().getDescription());
+            updatedRequest.getFeedback().setDate(requestDTO.getFeedback().getDate());
+            updatedRequest.getFeedback().setCustomer(updatedRequest.getCustomer());
+            updatedRequest.getFeedback().setEmployee(updatedRequest.getEmployee());
+        }
+
         requestRepository.save(updatedRequest);
         return ResponseEntity.status(HttpStatus.OK).body("Request updated successfully");
     }
