@@ -3,6 +3,8 @@ package com.graduationproject.serviceproviderplatform.controller;
 import com.graduationproject.serviceproviderplatform.model.*;
 import com.graduationproject.serviceproviderplatform.repository.*;
 import com.graduationproject.serviceproviderplatform.service.CategoryService;
+import com.graduationproject.serviceproviderplatform.service.InputService;
+import com.graduationproject.serviceproviderplatform.service.OptionService;
 import com.graduationproject.serviceproviderplatform.service.ServiceService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -28,18 +30,20 @@ public class CategoryController {
     private ServiceRepository serviceRepository;
     private ServiceService serviceService;
     private ServiceOptionRepository serviceOptionRepository;
-    private RequestRepository requestRepository;
-    private AppointmentRepository appointmentRepository;
+    private OptionService optionService;
+    private ServiceInputRepository serviceInputRepository;
+    private InputService inputService;
 
-    public CategoryController(CategoryRepository categoryRepository, CategoryService categoryService, ServiceRepository serviceRepository, CompanyRepository companyRepository, ServiceService serviceService, ServiceOptionRepository serviceOptionRepository, RequestRepository requestRepository, AppointmentRepository appointmentRepository) {
+    public CategoryController(CategoryRepository categoryRepository, CategoryService categoryService, ServiceRepository serviceRepository, CompanyRepository companyRepository, ServiceService serviceService, ServiceOptionRepository serviceOptionRepository, OptionService optionService, ServiceInputRepository serviceInputRepository, InputService inputService) {
         this.categoryRepository = categoryRepository;
         this.categoryService = categoryService;
         this.companyRepository = companyRepository;
         this.serviceRepository = serviceRepository;
         this.serviceService = serviceService;
         this.serviceOptionRepository = serviceOptionRepository;
-        this.requestRepository = requestRepository;
-        this.appointmentRepository = appointmentRepository;
+        this.optionService = optionService;
+        this.serviceInputRepository = serviceInputRepository;
+        this.inputService = inputService;
     }
 
     @GetMapping
@@ -113,7 +117,7 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.OK).body("Category deleted successfully");
     }
 
-    // ###################################### Services endpoints ###################################### //
+    // ###################################### Service endpoints ###################################### //
 
     @GetMapping("/{id}/services") // Get all services belong to this category
     public ResponseEntity<List<Service>> getAllServices(@PathVariable Long id) {
@@ -133,6 +137,7 @@ public class CategoryController {
         if (service.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
+        System.out.println(service);
         return ResponseEntity.status(HttpStatus.OK).body(service.get());
     }
 
@@ -141,8 +146,7 @@ public class CategoryController {
         if(bindingResult.hasErrors()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
         }
-        Optional<Category> category = categoryRepository.findById(categoryId);
-        if(category.isEmpty()) {
+        if(!categoryRepository.existsById(categoryId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no category with categoryId = " + categoryId);
         }
         List<Service> services = serviceRepository.findAllByName(service.getName());
@@ -150,12 +154,18 @@ public class CategoryController {
             if(s.getCategory().getId() == categoryId)
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("Service already exists in this category");
         }
-        Category updatedCategory = category.get();
-        Service newService = serviceRepository.save(service);
-        service.setCategory(updatedCategory);
-        updatedCategory.addService(newService);
-        categoryRepository.save(updatedCategory);
-        return ResponseEntity.status(HttpStatus.OK).body("Service added successfully with id = " + newService.getId());
+        Category category = categoryRepository.findById(categoryId).get();
+        service.setCategory(category);
+        service = serviceRepository.save(service);
+        for (ServiceOption option: service.getServiceOptions()) {
+            option.setService(service);
+            serviceOptionRepository.save(option);
+        }
+        for (ServiceInput input: service.getServiceInputs()) {
+            input.setService(service);
+            serviceInputRepository.save(input);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body("Service added successfully with id = " + service.getId());
     }
 
     @PutMapping("/{categoryId}/services/{serviceId}")
@@ -201,6 +211,135 @@ public class CategoryController {
         serviceService.delete(service);
         return ResponseEntity.status(HttpStatus.OK).body("Service deleted successfully");
     }
+
+    // ###################################### ServiceOption endpoints ###################################### //
+
+    @PostMapping("/{categoryId}/services/{serviceId}/options")
+    public ResponseEntity<String> addNewServiceOption(@PathVariable Long categoryId, @PathVariable Long serviceId, @Valid @RequestBody ServiceOption option, BindingResult bindingResult) {
+        if(bindingResult.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
+        }
+        if(!categoryRepository.existsById(categoryId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no category with categoryId = " + categoryId);
+        }
+        if(!serviceRepository.existsById(serviceId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no service with id = " + serviceId);
+        }
+
+        Service service = serviceRepository.findById(serviceId).get();
+        option.setService(service);
+        option = serviceOptionRepository.save(option);
+
+        return ResponseEntity.status(HttpStatus.OK).body("Option added successfully with id = " + option.getId());
+    }
+
+    @PutMapping("/{categoryId}/services/{serviceId}/options/{optionId}")
+    public ResponseEntity<String> updateServiceOption(@PathVariable Long categoryId, @PathVariable Long serviceId, @PathVariable Long optionId, @Valid @RequestBody ServiceOption option, BindingResult bindingResult) {
+        if(bindingResult.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
+        }
+        if(optionId != option.getId()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The id in the Url is different from the one in the body");
+        }
+        if(!categoryRepository.existsById(categoryId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no category with categoryId = " + categoryId);
+        }
+        if(!serviceRepository.existsById(serviceId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no service with id = " + serviceId);
+        }
+        if(!serviceOptionRepository.existsById(optionId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no option with id = " + optionId);
+        }
+
+        ServiceOption updatedOption = serviceOptionRepository.findById(optionId).get();
+        updatedOption.setName(option.getName());
+        updatedOption.setDescription(option.getDescription());
+
+        serviceOptionRepository.save(updatedOption);
+        return ResponseEntity.status(HttpStatus.OK).body("Option updated successfully");
+    }
+
+    @DeleteMapping("/{categoryId}/services/{serviceId}/options/{optionId}")
+    public ResponseEntity<String> deleteServiceOption(@PathVariable Long categoryId, @PathVariable Long serviceId, @PathVariable Long optionId) {
+        if(!categoryRepository.existsById(categoryId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no category with id = " + categoryId);
+        }
+        if(!serviceRepository.existsById(serviceId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no service with id = " + serviceId);
+        }
+        if(!serviceOptionRepository.existsById(optionId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no option with id = " + optionId);
+        }
+        ServiceOption option = serviceOptionRepository.findById(optionId).get();
+        optionService.delete(option);
+        return ResponseEntity.status(HttpStatus.OK).body("Option deleted successfully");
+    }
+
+    // ###################################### ServicesInput endpoints ###################################### //
+
+    @PostMapping("/{categoryId}/services/{serviceId}/inputs")
+    public ResponseEntity<String> addNewServiceInput(@PathVariable Long categoryId, @PathVariable Long serviceId, @Valid @RequestBody ServiceInput input, BindingResult bindingResult) {
+        if(bindingResult.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
+        }
+        if(!categoryRepository.existsById(categoryId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no category with categoryId = " + categoryId);
+        }
+        if(!serviceRepository.existsById(serviceId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no service with id = " + serviceId);
+        }
+
+        Service service = serviceRepository.findById(serviceId).get();
+        input.setService(service);
+        input = serviceInputRepository.save(input);
+
+        return ResponseEntity.status(HttpStatus.OK).body("Input added successfully with id = " + input.getId());
+    }
+
+    @PutMapping("/{categoryId}/services/{serviceId}/inputs/{inputId}")
+    public ResponseEntity<String> updateServiceInput(@PathVariable Long categoryId, @PathVariable Long serviceId, @PathVariable Long inputId, @Valid @RequestBody ServiceInput input, BindingResult bindingResult) {
+        if(bindingResult.hasErrors()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
+        }
+        if(inputId != input.getId()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The id in the Url is different from the one in the body");
+        }
+        if(!categoryRepository.existsById(categoryId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no category with categoryId = " + categoryId);
+        }
+        if(!serviceRepository.existsById(serviceId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no service with id = " + serviceId);
+        }
+        if(!serviceInputRepository.existsById(inputId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no input with id = " + inputId);
+        }
+
+        ServiceInput updatedInput = serviceInputRepository.findById(inputId).get();
+        updatedInput.setName(input.getName());
+        updatedInput.setDescription(input.getDescription());
+        updatedInput.setRequired(input.isRequired());
+
+        serviceInputRepository.save(updatedInput);
+        return ResponseEntity.status(HttpStatus.OK).body("Input updated successfully");
+    }
+
+    @DeleteMapping("/{categoryId}/services/{serviceId}/inputs/{inputId}")
+    public ResponseEntity<String> deleteServiceInput(@PathVariable Long categoryId, @PathVariable Long serviceId, @PathVariable Long inputId) {
+        if(!categoryRepository.existsById(categoryId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no category with id = " + categoryId);
+        }
+        if(!serviceRepository.existsById(serviceId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no service with id = " + serviceId);
+        }
+        if(!serviceInputRepository.existsById(inputId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no input with id = " + inputId);
+        }
+        ServiceInput input = serviceInputRepository.findById(inputId).get();
+        inputService.delete(input);
+        return ResponseEntity.status(HttpStatus.OK).body("Service input deleted successfully");
+    }
+
+    // ###################################### Service availability endpoints ###################################### //
 
     @GetMapping("/{categoryId}/services/{serviceId}/unavailable-dates")
     public ResponseEntity<List<LocalDate>> getUnavailableDates(@PathVariable Long categoryId, @PathVariable Long serviceId) {

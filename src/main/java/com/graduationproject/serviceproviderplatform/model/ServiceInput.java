@@ -1,5 +1,6 @@
 package com.graduationproject.serviceproviderplatform.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,5 +22,7 @@ public class ServiceInput {
     private boolean isRequired;
 
     @ManyToOne
+    @JsonIgnore
+    @ToString.Exclude
     private Service service;
 }

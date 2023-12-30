@@ -1,5 +1,6 @@
 package com.graduationproject.serviceproviderplatform.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
@@ -20,5 +21,7 @@ public class ServiceOption {
     private String description;
 
     @ManyToOne
+    @JsonIgnore
+    @ToString.Exclude
     private Service service;
 }
