@@ -129,19 +129,16 @@ public class EmployeeController {
         return ResponseEntity.status(HttpStatus.OK).body(employee.getRequests());
     }
 
-    @GetMapping("/{id}/incomplete-requests")
-    public ResponseEntity<List<Request>> getEmployeeIncompleteRequests(@PathVariable Long id) {
+    @GetMapping("/{id}/requests/{status}")
+    public ResponseEntity<List<Request>> getEmployeeSpecificRequests(@PathVariable Long id, @PathVariable String status) {
         if(!employeeRepository.existsById(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
         Employee employee = employeeRepository.findById(id).get();
         List<Request> requests = employee.getRequests();
         List<Request> incompleteRequests = new ArrayList<>();
-//        if(requests == null) {
-//            return ResponseEntity.status(HttpStatus.OK).body(null);
-//        }
         for(Request request: requests) {
-            if(request.getStatus().equals("inCompleted")) {
+            if(request.getStatus().equals(status)) {
                 incompleteRequests.add(request);
             }
         }

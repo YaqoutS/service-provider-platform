@@ -96,20 +96,16 @@ public class CustomerController {
         return ResponseEntity.status(HttpStatus.OK).body(customer.getRequests());
     }
 
-    @GetMapping("/{id}/incomplete-requests")
-    public ResponseEntity<List<Request>> getUserIncompleteRequests(@PathVariable Long id) {
+    @GetMapping("/{id}/requests/{status}")
+    public ResponseEntity<List<Request>> getCustomerSpecificRequests(@PathVariable Long id, @PathVariable String status) {
         if(!customerRepository.existsById(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
         Customer customer = customerRepository.findById(id).get();
         List<Request> requests = customer.getRequests();
         List<Request> incompleteRequests = new ArrayList<>();
-//        if(requests == null) {
-//            System.out.println("There is no in-complete request");
-//            return ResponseEntity.status(HttpStatus.OK).body(null);
-//        };
         for(Request request: requests) {
-            if(request.getStatus().equals("inComplete")) {
+            if(request.getStatus().equals(status)) {
                 incompleteRequests.add(request);
             }
         }
