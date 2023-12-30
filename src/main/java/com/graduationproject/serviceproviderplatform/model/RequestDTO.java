@@ -30,6 +30,9 @@ public class RequestDTO {
 
     private String status; // suspended completed inComplete
 
-    @ElementCollection
-    private List<Integer> choices = new ArrayList<>();
+    @NonNull
+    private List<OptionChoice> optionChoices = new ArrayList<>();
+
+    @NonNull
+    private List<InputChoice> inputChoices = new ArrayList<>();
 }

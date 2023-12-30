@@ -1,5 +1,6 @@
 package com.graduationproject.serviceproviderplatform.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -19,10 +20,14 @@ public class ServiceFeedback {
 
     @NonNull
     @ManyToOne
+    @JsonIgnore
+    @ToString.Exclude
     private Customer customer;
 
     @NonNull
     @ManyToOne
+    @JsonIgnore
+    @ToString.Exclude
     private Employee employee;
 
     @NonNull @Min(1) @Max(5)

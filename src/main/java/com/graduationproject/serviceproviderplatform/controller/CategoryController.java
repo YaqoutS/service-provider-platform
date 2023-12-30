@@ -254,6 +254,7 @@ public class CategoryController {
         ServiceOption updatedOption = serviceOptionRepository.findById(optionId).get();
         updatedOption.setName(option.getName());
         updatedOption.setDescription(option.getDescription());
+        updatedOption.setPrice(option.getPrice());
 
         serviceOptionRepository.save(updatedOption);
         return ResponseEntity.status(HttpStatus.OK).body("Option updated successfully");

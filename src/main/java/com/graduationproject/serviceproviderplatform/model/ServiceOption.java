@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @RequiredArgsConstructor
 @Getter
@@ -20,8 +23,13 @@ public class ServiceOption {
 
     private String description;
 
+    private int price;
+
     @ManyToOne
     @JsonIgnore
     @ToString.Exclude
     private Service service;
+
+    @OneToMany(mappedBy = "option", cascade = CascadeType.ALL)
+    private List<OptionChoice> optionChoices = new ArrayList<>();
 }

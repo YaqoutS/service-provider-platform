@@ -1,8 +1,6 @@
 package com.graduationproject.serviceproviderplatform.controller;
 
-import com.graduationproject.serviceproviderplatform.model.Request;
-import com.graduationproject.serviceproviderplatform.model.RequestDTO;
-import com.graduationproject.serviceproviderplatform.model.ServiceFeedback;
+import com.graduationproject.serviceproviderplatform.model.*;
 import com.graduationproject.serviceproviderplatform.repository.*;
 import com.graduationproject.serviceproviderplatform.service.FeedbackService;
 import com.graduationproject.serviceproviderplatform.service.RequestService;
@@ -26,8 +24,10 @@ public class RequestController {
     private CustomerRepository customerRepository;
     private ServiceFeedbackRepository feedbackRepository;
     private FeedbackService feedbackService;
+    private OptionChoiceRepository optionChoiceRepository;
+    private InputChoiceRepository inputChoiceRepository;
 
-    public RequestController(RequestRepository requestRepository, RequestService requestService, ServiceRepository serviceRepository, EmployeeRepository employeeRepository, CustomerRepository customerRepository, ServiceFeedbackRepository feedbackRepository, FeedbackService feedbackService) {
+    public RequestController(RequestRepository requestRepository, RequestService requestService, ServiceRepository serviceRepository, EmployeeRepository employeeRepository, CustomerRepository customerRepository, ServiceFeedbackRepository feedbackRepository, FeedbackService feedbackService, OptionChoiceRepository optionChoiceRepository, InputChoiceRepository inputChoiceRepository) {
         this.requestRepository = requestRepository;
         this.requestService = requestService;
         this.serviceRepository = serviceRepository;
@@ -35,6 +35,8 @@ public class RequestController {
         this.customerRepository = customerRepository;
         this.feedbackRepository = feedbackRepository;
         this.feedbackService = feedbackService;
+        this.optionChoiceRepository = optionChoiceRepository;
+        this.inputChoiceRepository = inputChoiceRepository;
     }
 
     @GetMapping
@@ -58,7 +60,7 @@ public class RequestController {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
         }
-        if (requestDTO.getServiceId() == null || requestDTO.getCustomerId() == null || requestDTO.getAppointment() == null || requestDTO.getChoices() == null) {
+        if (requestDTO.getServiceId() == null || requestDTO.getCustomerId() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
         }
         Request request = new Request(requestDTO);  // service, employee, customer
@@ -82,6 +84,15 @@ public class RequestController {
         }
 
         request = requestRepository.save(request);
+
+        for (OptionChoice choice : requestDTO.getOptionChoices()) {
+            choice.setRequest(request);
+            optionChoiceRepository.save(choice);
+        }
+        for (InputChoice choice : requestDTO.getInputChoices()) {
+            choice.setRequest(request);
+            inputChoiceRepository.save(choice);
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body("Request created successfully with id = " + request.getId());
     }
 
@@ -97,15 +108,17 @@ public class RequestController {
 
         Request updatedRequest = optionalRequest.get();
         updatedRequest.setStatus(requestDTO.getStatus());
-        updatedRequest.setChoices(requestDTO.getChoices()); // Should we allow the customer to change them?
 
         // Update the appointment
-        if(updatedRequest.getAppointment() != null && requestDTO.getAppointment() != null) {
+        if(updatedRequest.getAppointment() == null || requestDTO.getAppointment() == null) {
+            updatedRequest.setAppointment(requestDTO.getAppointment());
+        }
+        else if(updatedRequest.getAppointment() != null && requestDTO.getAppointment() != null) {
             updatedRequest.getAppointment().setStartDate(requestDTO.getAppointment().getStartDate());
             updatedRequest.getAppointment().setEndDate(requestDTO.getAppointment().getEndDate());
             updatedRequest.getAppointment().setStartTime(requestDTO.getAppointment().getStartTime());
             updatedRequest.getAppointment().setEndTime(requestDTO.getAppointment().getEndTime());
-            // The address can't be changed
+            updatedRequest.getAppointment().setAddress(requestDTO.getAppointment().getAddress());
         }
 
         // Update the employee

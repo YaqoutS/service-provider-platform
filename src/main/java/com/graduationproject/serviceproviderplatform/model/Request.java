@@ -20,7 +20,6 @@ public class Request {
     @ManyToOne
     private Service service;
 
-    @NonNull
     @OneToOne(cascade = CascadeType.ALL)
     private Appointment appointment;
 
@@ -39,13 +38,17 @@ public class Request {
     private String status; // suspended completed inComplete
     // If the employee refuses the request, let's delete it immediately
 
-    @ElementCollection
-    private List<Integer> choices = new ArrayList<>();
+    @OneToMany(mappedBy = "request", cascade = CascadeType.ALL)
+    private List<OptionChoice> optionChoices = new ArrayList<>();
+
+    @OneToMany(mappedBy = "request", cascade = CascadeType.ALL)
+    private List<InputChoice> inputChoices = new ArrayList<>();
 
     public Request(RequestDTO requestDTO) {
         this.appointment = requestDTO.getAppointment();
         this.feedback = requestDTO.getFeedback();
         this.status = requestDTO.getStatus();
-        this.choices = requestDTO.getChoices();
+        this.optionChoices = requestDTO.getOptionChoices();
+        this.inputChoices = requestDTO.getInputChoices();
     }
 }

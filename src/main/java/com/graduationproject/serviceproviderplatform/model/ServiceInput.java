@@ -4,6 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @RequiredArgsConstructor
 @NoArgsConstructor
@@ -25,4 +28,7 @@ public class ServiceInput {
     @JsonIgnore
     @ToString.Exclude
     private Service service;
+
+    @OneToMany(mappedBy = "input", cascade = CascadeType.ALL)
+    private List<InputChoice> inputChoices = new ArrayList<>();
 }
