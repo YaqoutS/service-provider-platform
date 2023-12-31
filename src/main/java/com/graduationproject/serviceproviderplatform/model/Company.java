@@ -4,7 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.DayOfWeek;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -33,6 +37,15 @@ public class Company {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     private Address address;
+
+    @NonNull
+    private Set<DayOfWeek> workDays = new HashSet<>();
+
+    @NonNull
+    private LocalTime workStartTime;
+
+    @NonNull
+    private LocalTime workEndTime;
 
     @OneToMany(mappedBy = "company")
     @JsonIgnore

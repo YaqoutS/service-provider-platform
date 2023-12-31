@@ -81,6 +81,9 @@ public class EmployeeController {
         updatedEmployee.setRating(employeeDTO.getRating()); //I think there is no need for this line because the rating will change with every feedback, and it has its own API
         updatedEmployee.setEnabled(employeeDTO.isEnabled());
         updatedEmployee.setYearsOfExperience(employeeDTO.getYearsOfExperience());
+        updatedEmployee.setWorkDays(employeeDTO.getWorkDays());
+        updatedEmployee.setWorkStartTime(employeeDTO.getWorkStartTime());
+        updatedEmployee.setWorkEndTime(employeeDTO.getWorkEndTime());
 
         employeeRepository.save(updatedEmployee);
         return ResponseEntity.status(HttpStatus.OK).body("Employee updated successfully");

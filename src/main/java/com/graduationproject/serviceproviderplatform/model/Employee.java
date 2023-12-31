@@ -5,10 +5,10 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.DayOfWeek;
+import java.time.LocalTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -28,6 +28,12 @@ public class Employee extends User {
     private String companyName;
 
     private int yearsOfExperience;
+
+    private Set<DayOfWeek> workDays;
+
+    private LocalTime workStartTime;
+
+    private LocalTime workEndTime;
 
     @ManyToMany(mappedBy = "employees")
     @JsonIgnore
@@ -63,4 +69,26 @@ public class Employee extends User {
         services.remove(service);
     }
 
+    @JsonIgnore
+    public List<Appointment> getAppointments() {
+        return requests.stream()
+                .map(Request::getAppointment)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
+    public Set<DayOfWeek> getWorkDays() {
+        if (company != null) return company.getWorkDays();
+        return workDays;
+    }
+
+    public LocalTime getWorkStartTime() {
+        if (company != null) return company.getWorkStartTime();
+        return workStartTime;
+    }
+
+    public LocalTime getWorkEndTime() {
+        if (company != null) return company.getWorkEndTime();
+        return workEndTime;
+    }
 }

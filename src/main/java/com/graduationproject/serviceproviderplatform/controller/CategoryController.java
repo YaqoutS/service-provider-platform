@@ -33,8 +33,18 @@ public class CategoryController {
     private OptionService optionService;
     private ServiceInputRepository serviceInputRepository;
     private InputService inputService;
+    private EmployeeRepository employeeRepository;
 
-    public CategoryController(CategoryRepository categoryRepository, CategoryService categoryService, ServiceRepository serviceRepository, CompanyRepository companyRepository, ServiceService serviceService, ServiceOptionRepository serviceOptionRepository, OptionService optionService, ServiceInputRepository serviceInputRepository, InputService inputService) {
+    public CategoryController(CategoryRepository categoryRepository,
+                              CategoryService categoryService,
+                              ServiceRepository serviceRepository,
+                              CompanyRepository companyRepository,
+                              ServiceService serviceService,
+                              ServiceOptionRepository serviceOptionRepository,
+                              OptionService optionService,
+                              ServiceInputRepository serviceInputRepository,
+                              InputService inputService,
+                              EmployeeRepository employeeRepository) {
         this.categoryRepository = categoryRepository;
         this.categoryService = categoryService;
         this.companyRepository = companyRepository;
@@ -44,6 +54,7 @@ public class CategoryController {
         this.optionService = optionService;
         this.serviceInputRepository = serviceInputRepository;
         this.inputService = inputService;
+        this.employeeRepository = employeeRepository;
     }
 
     @GetMapping
@@ -185,8 +196,10 @@ public class CategoryController {
         if(optionalService.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no service with id = " + serviceId);
         }
-        if(serviceRepository.existsByName(service.getName())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Name is already in use");
+        List<Service> services = serviceRepository.findAllByName(service.getName());
+        for (Service s : services) {
+            if(s.getCategory().getId() == categoryId)
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Service already exists in this category");
         }
 
         Service updatedService = optionalService.get();
@@ -211,6 +224,9 @@ public class CategoryController {
         serviceService.delete(service);
         return ResponseEntity.status(HttpStatus.OK).body("Service deleted successfully");
     }
+
+    // We need an API to add and remove employees to/from the service
+    // I think it's better to put this API here rather than in the employee controller
 
     // ###################################### ServiceOption endpoints ###################################### //
 
@@ -344,50 +360,56 @@ public class CategoryController {
 
     @GetMapping("/{categoryId}/services/{serviceId}/unavailable-dates")
     public ResponseEntity<List<LocalDate>> getUnavailableDates(@PathVariable Long categoryId, @PathVariable Long serviceId) {
-        if(!categoryRepository.existsById(categoryId)) {
+        if (!categoryRepository.existsById(categoryId) || !serviceRepository.existsById(serviceId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-        if(!serviceRepository.existsById(serviceId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-        List<Appointment> appointments = serviceRepository.findById(serviceId).get().getAppointments();
+
+        Service service = serviceRepository.findById(serviceId).get();
+        List<Appointment> appointments = service.getAppointments();
+
+        System.out.println("Appointments" + appointments);
 
         // Group appointments by date
         Map<LocalDate, Long> appointmentsByDate = appointments.stream()
                 .collect(Collectors.groupingBy(Appointment::getStartDate, Collectors.counting()));
 
+        System.out.println("Appointments by date" + appointmentsByDate);
+
         // Filter dates where all slots are reserved (assuming 10 slots per day)
         List<LocalDate> unavailableDays = appointmentsByDate.entrySet().stream()
-                .filter(entry -> getAvailableTimes(serviceId, entry.getKey()).size() == 0  )
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
-
+                    .filter(entry -> getAllAvailableTimes(serviceId, entry.getKey()).isEmpty())
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
         return ResponseEntity.status(HttpStatus.OK).body(unavailableDays);
     }
 
     @GetMapping("/{categoryId}/services/{serviceId}/available-times/{date}")
     public ResponseEntity<List<LocalTime>> getAvailableTimes(@PathVariable Long categoryId, @PathVariable Long serviceId, @PathVariable LocalDate date) {
-        if(!categoryRepository.existsById(categoryId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-        if(!serviceRepository.existsById(serviceId)) {
+        if (!categoryRepository.existsById(categoryId) || !serviceRepository.existsById(serviceId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
-        List<LocalTime> availableTimes = getAvailableTimes(serviceId, date);
-
+        List<LocalTime> availableTimes = getAllAvailableTimes(serviceId, date);
         return ResponseEntity.status(HttpStatus.OK).body(availableTimes);
     }
 
-    private List<LocalTime> getAvailableTimes(Long serviceId, LocalDate date) {
-        // I think this will be called in the previous two APIs ...
-        List<Appointment> appointments = serviceRepository.findById(serviceId).get().getAppointments()
+    private List<LocalTime> getEmployeeAvailableTimes(Employee employee, LocalDate date) {
+
+        System.out.println("Inside getEmployeeAvailableTimes. Id = " + employee.getId());
+
+        if (!employee.getWorkDays().contains(date.getDayOfWeek())) {
+            return Collections.emptyList(); // Not a working day
+        }
+
+        List<Appointment> appointments = employee.getAppointments()
                 .stream().filter(a -> a.getStartDate().equals(date)).toList();
+
+        System.out.println("Employee appointments" + appointments);
 
         // Create a set of all possible time slots for the day (assuming 1-hour slots from 8am to 6pm)
         Set<LocalTime> allTimeSlots = new HashSet<>();
-        LocalTime currentTime = LocalTime.of(8, 0);
-        while (currentTime.isBefore(LocalTime.of(18, 0))) {
+        LocalTime currentTime = employee.getWorkStartTime();
+        while (currentTime.isBefore(employee.getWorkEndTime())) {
             allTimeSlots.add(currentTime);
             currentTime = currentTime.plusHours(1);
         }
@@ -406,6 +428,23 @@ public class CategoryController {
 
         // Convert the set of available time slots to a sorted list
         List<LocalTime> availableTimes = new ArrayList<>(allTimeSlots);
+        Collections.sort(availableTimes);
+        System.out.println("Available times: ");
+        System.out.println("");
+        return availableTimes;
+    }
+
+    private List<LocalTime> getAllAvailableTimes(Long serviceId, LocalDate date) {
+        Service service = serviceRepository.findById(serviceId).get();
+        List<LocalTime> availableTimes = new ArrayList<>();
+
+        for (Employee employee : service.getEmployees()) {
+            List<LocalTime> employeeTimes = getEmployeeAvailableTimes(employee, date);
+            employeeTimes = employeeTimes.stream()
+                    .filter(time -> !availableTimes.contains(time))
+                    .collect(Collectors.toList());
+            availableTimes.addAll(employeeTimes);
+        }
         Collections.sort(availableTimes);
         return availableTimes;
     }

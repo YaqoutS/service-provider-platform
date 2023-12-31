@@ -9,7 +9,12 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 @SpringBootApplication(exclude = SecurityAutoConfiguration.class)
 public class ServiceProviderPlatformApplication {
@@ -47,7 +52,12 @@ public class ServiceProviderPlatformApplication {
             mainAdmin.setDateOfBirth(LocalDate.of(2001, 11, 18));
             userRepository.save(mainAdmin);
 
-            Company company = new Company("Company 1");
+            Set<DayOfWeek> workDays = new HashSet<>();
+            workDays.add(DayOfWeek.MONDAY);
+            workDays.add(DayOfWeek.WEDNESDAY);
+
+            Company company = new Company("Company 1", LocalTime.of(9, 0), LocalTime.of(17, 0));
+            company.setWorkDays(workDays);
             Company newCompany = companyRepository.save(company);
 
             Admin admin = new Admin("company 1", "company1@gmail.com", secret, true, newCompany);
@@ -55,7 +65,6 @@ public class ServiceProviderPlatformApplication {
             admin.setConfirmPassword(secret);
             admin.setCompany(newCompany);
             Admin newAdmin = adminRepository.save(admin);
-//            newCompany.setAdmin(newAdmin);
             companyRepository.save(newCompany);
             System.out.println(newCompany);
 
@@ -67,6 +76,10 @@ public class ServiceProviderPlatformApplication {
             Employee employee = new Employee("Employee 1", "employee@gmail.com", secret, true);
             employee.addRole(employeeRole);
             employee.setConfirmPassword(secret);
+            workDays.add(DayOfWeek.SUNDAY);
+            employee.setWorkDays(workDays);
+            employee.setWorkStartTime(LocalTime.of(8, 0));
+            employee.setWorkEndTime(LocalTime.of(18, 0));
             employeeRepository.save(employee);
 
             System.out.println("Users and roles added successfully");

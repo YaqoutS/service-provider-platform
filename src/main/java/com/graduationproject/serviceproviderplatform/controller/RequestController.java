@@ -66,21 +66,26 @@ public class RequestController {
         Request request = new Request(requestDTO);  // service, employee, customer
         request.setStatus("suspended");
 
-        if (serviceRepository.existsById(requestDTO.getServiceId())) {
-            request.setService(serviceRepository.findById(requestDTO.getServiceId()).get());
-        } else
+        if (!serviceRepository.existsById(requestDTO.getServiceId())) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no service with id = " + requestDTO.getServiceId());
+        }
+        Service service = serviceRepository.findById(requestDTO.getServiceId()).get();
+        request.setService(service);
 
-        if (customerRepository.existsById(requestDTO.getCustomerId())) {
-            request.setCustomer(customerRepository.findById(requestDTO.getCustomerId()).get());
-        } else
+        if (!customerRepository.existsById(requestDTO.getCustomerId())) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no customer with id = " + requestDTO.getCustomerId());
+        }
+        request.setCustomer(customerRepository.findById(requestDTO.getCustomerId()).get());
 
         if (requestDTO.getEmployeeId() != null) {
-            if (employeeRepository.existsById(requestDTO.getEmployeeId())) {
-                request.setEmployee(employeeRepository.findById(requestDTO.getEmployeeId()).get());
-            } else
+            if (!employeeRepository.existsById(requestDTO.getEmployeeId())) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no employee with id = " + requestDTO.getEmployeeId());
+            }
+            Employee employee = employeeRepository.findById(requestDTO.getEmployeeId()).get();
+            if (!service.getEmployees().contains(employee)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no employee for this service with id = " + requestDTO.getEmployeeId());
+            }
+            request.setEmployee(employee);
         }
 
         request = requestRepository.save(request);

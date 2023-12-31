@@ -67,6 +67,9 @@ public class CompanyController {
         updatedCompany.setDescription(company.getDescription());
         updatedCompany.setPhone(company.getPhone());
         updatedCompany.setAddress(company.getAddress());
+        updatedCompany.setWorkDays(company.getWorkDays());
+        updatedCompany.setWorkStartTime(company.getWorkStartTime());
+        updatedCompany.setWorkEndTime(company.getWorkEndTime());
         companyRepository.save(updatedCompany);
         return ResponseEntity.status(HttpStatus.OK).body("Company updated successfully");
     }

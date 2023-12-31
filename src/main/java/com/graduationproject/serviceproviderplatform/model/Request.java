@@ -30,13 +30,15 @@ public class Request {
     @ManyToOne
     private Customer customer;
 
+    private String status; // suspended completed inComplete
+    // If the employee refuses the request, let's delete it immediately
+
+    @NonNull
+    private Long price;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "feedback_id", referencedColumnName = "id")
     private ServiceFeedback feedback;
-
-    @NonNull
-    private String status; // suspended completed inComplete
-    // If the employee refuses the request, let's delete it immediately
 
     @OneToMany(mappedBy = "request", cascade = CascadeType.ALL)
     private List<OptionChoice> optionChoices = new ArrayList<>();
