@@ -131,12 +131,12 @@ public class CategoryController {
     // ###################################### Service endpoints ###################################### //
 
     @GetMapping("/{id}/services") // Get all services belong to this category
-    public ResponseEntity<List<Service>> getAllServices(@PathVariable Long id) {
+    public ResponseEntity<Set<Service>> getAllServices(@PathVariable Long id) {
         if(!categoryRepository.existsById(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-        List<Service> services = serviceRepository.findAll();
-        return ResponseEntity.ok(services);
+        Category category = categoryRepository.findById(id).get();
+        return ResponseEntity.ok(category.getServices());
     }
 
     @GetMapping("/{categoryId}/services/{serviceId}")
