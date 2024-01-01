@@ -8,11 +8,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Entity
-@RequiredArgsConstructor
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
+@RequiredArgsConstructor
 public class Service {
     @Id @GeneratedValue
     private Long id;
@@ -30,6 +31,7 @@ public class Service {
     @JoinColumn(name = "image_id", referencedColumnName = "id")
     private Image image;
 
+    @NonNull
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
@@ -44,6 +46,7 @@ public class Service {
     )
     private Set<Employee> employees = new HashSet<>(); // If the service belong to a freelancer, This list will only have one employee
 
+    @NonNull
     private boolean isAvailable;
 
     @NonNull

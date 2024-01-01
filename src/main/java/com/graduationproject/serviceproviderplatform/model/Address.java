@@ -7,6 +7,7 @@ import jakarta.persistence.Id;
 import lombok.*;
 
 @Entity
+@AllArgsConstructor
 @RequiredArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -17,12 +18,15 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String line1;
-
-    private String line2;
-
     @NonNull
     private String city;
 
+    @NonNull
+    private String line1;
+
+    @NonNull
+    private String line2;
+
+    @NonNull
     private String postalCode;
 }

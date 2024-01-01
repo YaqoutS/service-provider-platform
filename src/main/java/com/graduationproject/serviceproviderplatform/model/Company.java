@@ -25,8 +25,10 @@ public class Company {
     @JoinColumn(name = "image_id", referencedColumnName = "id")
     private Image image;
 
+    @NonNull
     private String field;
 
+    @NonNull
     private String description;
 
     private String phone;

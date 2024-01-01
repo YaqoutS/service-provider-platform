@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 @Setter
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class Employee extends User {
     private double rating;
 
@@ -53,6 +54,12 @@ public class Employee extends User {
 
     public Employee(@NonNull String fullName, @NonNull @Size(min = 8, max = 30) String email, @NonNull String password, @NonNull boolean enabled) {
         super(fullName, email, password, enabled);
+    }
+
+    public Employee(String name, String email, String password, String confirmPassword, boolean enabled, Company company, int yearsOfExperience, Address address, String phone) {
+        super(name, email, password, confirmPassword, enabled, address, phone);
+        this.company = company;
+        this.yearsOfExperience = yearsOfExperience;
     }
 
 //    public Employee(EmployeeDTO employeeDTO) {

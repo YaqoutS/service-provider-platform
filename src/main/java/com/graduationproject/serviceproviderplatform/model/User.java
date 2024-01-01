@@ -12,11 +12,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@RequiredArgsConstructor
 @Getter
 @Setter
 @ToString
 @NoArgsConstructor
+@RequiredArgsConstructor
+@AllArgsConstructor
 @Table(name="users")
 @Inheritance(strategy = InheritanceType.JOINED)
 @PasswordMatch
@@ -56,7 +57,7 @@ public class User {
     private Address address;
 
     private String phone;
-    
+
 //    private String activationCode;
 
     @NonNull
@@ -72,6 +73,16 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
+    public User(String name, String email, String password, String confirmPassword, boolean enabled, Address address, String phone) {
+        this.fullName = name;
+        this.email = email;
+        this.password = password;
+        this.confirmPassword = confirmPassword;
+        this.enabled = enabled;
+        this.address = address;
+        this.phone = phone;
+    }
+
 
     @PostLoad
     private void calculateAge() {
@@ -84,3 +95,5 @@ public class User {
         roles.add(role);
     }
 }
+
+

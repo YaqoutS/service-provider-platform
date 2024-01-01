@@ -27,4 +27,8 @@ public class Customer extends User {
     public Customer(String name, String email, String password, boolean enabled) {
         super(name, email, password, enabled);
     }
+
+    public Customer(String name, String email, String password, String confirmPassword, boolean enabled, Address address, String phone) {
+        super(name, email, password, confirmPassword, enabled, address, phone);
+    }
 }
