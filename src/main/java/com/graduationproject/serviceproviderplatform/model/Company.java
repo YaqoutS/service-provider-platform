@@ -6,10 +6,7 @@ import lombok.*;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @RequiredArgsConstructor
@@ -38,8 +35,7 @@ public class Company {
     @JoinColumn(name = "address_id", referencedColumnName = "id")
     private Address address;
 
-    @NonNull
-    private Set<DayOfWeek> workDays = new HashSet<>();
+    private Set<DayOfWeek> workDays;
 
     @NonNull
     private LocalTime workStartTime;
@@ -66,7 +62,10 @@ public class Company {
         this.address = companyDTO.getAddress();
     }
 
-//    public Company(String name) {
-//        this.name = name;
-//    }
+    public Set<DayOfWeek> getWorkDays() {
+        Set<DayOfWeek> defaultWorkDays = EnumSet.allOf(DayOfWeek.class);
+        defaultWorkDays.remove(DayOfWeek.FRIDAY);
+        return Optional.ofNullable(workDays)
+                .orElse(defaultWorkDays);
+    }
 }

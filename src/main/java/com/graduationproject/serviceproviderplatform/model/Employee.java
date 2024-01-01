@@ -78,8 +78,13 @@ public class Employee extends User {
     }
 
     public Set<DayOfWeek> getWorkDays() {
-        if (company != null) return company.getWorkDays();
-        return workDays;
+        Set<DayOfWeek> defaultWorkDays = EnumSet.allOf(DayOfWeek.class);
+        defaultWorkDays.remove(DayOfWeek.FRIDAY);
+        return Optional.ofNullable(company)                     // Wrap company in Optional
+                .map(Company::getWorkDays)                      // If company is not null, get its work days
+                .orElseGet(() -> Optional.ofNullable(workDays)  // If company or its work days are null, try workDays
+                        .orElse(defaultWorkDays)                // If workDays is null, return defaultWorkDays
+                );
     }
 
     public LocalTime getWorkStartTime() {
