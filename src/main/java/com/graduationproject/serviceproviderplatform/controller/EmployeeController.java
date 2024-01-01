@@ -13,9 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.time.DayOfWeek;
+import java.util.*;
 
 @RestController
 @RequestMapping("/employees")
@@ -156,4 +155,18 @@ public class EmployeeController {
         Employee employee = employeeRepository.findById(id).get();
         return ResponseEntity.status(HttpStatus.OK).body(employee.getFeedbacks());
     }
+
+    @GetMapping("/{id}/holidays")
+    public ResponseEntity<Set<DayOfWeek>> getEmployeeHolidays(@PathVariable Long id) {
+        if(!employeeRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        Employee employee = employeeRepository.findById(id).get();
+        Set<DayOfWeek> workDays = employee.getWorkDays();
+        Set<DayOfWeek> holidayDays = EnumSet.allOf(DayOfWeek.class);
+        holidayDays.removeAll(workDays);
+        return ResponseEntity.ok(holidayDays);
+    }
+
+
 }
