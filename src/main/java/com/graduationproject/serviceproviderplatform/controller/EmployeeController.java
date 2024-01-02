@@ -122,6 +122,15 @@ public class EmployeeController {
         return ResponseEntity.status(HttpStatus.OK).body("Service added successfully");
     }
 
+    @GetMapping("/{id}/services")
+    public ResponseEntity<Set<Service>> getEmployeeServicess(@PathVariable Long id) {
+        if(!employeeRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        Employee employee = employeeRepository.findById(id).get();
+        return ResponseEntity.status(HttpStatus.OK).body(employee.getServices());
+    }
+
     @GetMapping("/{id}/requests")
     public ResponseEntity<List<Request>> getEmployeeRequests(@PathVariable Long id) {
         if(!employeeRepository.existsById(id)) {
