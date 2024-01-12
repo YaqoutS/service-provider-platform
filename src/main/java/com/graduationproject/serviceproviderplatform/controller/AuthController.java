@@ -86,9 +86,6 @@ public class AuthController {
         if(companyRepository.existsByName(companyDTO.getName())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Name is already in use!");
         }
-//        if(!companyDTO.getPassword().equals(companyDTO.getConfirmPassword())) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Password and confirm password don't match");
-//        }
 
         String secret = passwordEncoder.encode(companyDTO.getPassword());
         Role adminRole = roleRepository.findByName("ROLE_CADMIN");
@@ -100,7 +97,6 @@ public class AuthController {
         admin = adminRepository.save(admin);
 
         Company company = new Company(companyDTO);
-//        company.setAdmin(admin);
         company = companyRepository.save(company);
         admin.setCompany(company);
         adminRepository.save(admin);

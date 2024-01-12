@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.DayOfWeek;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -123,6 +125,18 @@ public class CompanyController {
         }
         Company company = companyRepository.findById(id).get();
         return ResponseEntity.status(HttpStatus.OK).body(company.getCategories());
+    }
+
+    @GetMapping("/{id}/holidays")
+    public ResponseEntity<Set<DayOfWeek>> getCompanyHolidays(@PathVariable Long id) {
+        if(!companyRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        Company company = companyRepository.findById(id).get();
+        Set<DayOfWeek> workDays = company.getWorkDays();
+        Set<DayOfWeek> holidayDays = EnumSet.allOf(DayOfWeek.class);
+        holidayDays.removeAll(workDays);
+        return ResponseEntity.ok(holidayDays);
     }
 
 }

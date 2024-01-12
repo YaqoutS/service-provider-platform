@@ -9,8 +9,11 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @SpringBootApplication(exclude = SecurityAutoConfiguration.class)
 public class ServiceProviderPlatformApplication {
@@ -117,9 +120,15 @@ public class ServiceProviderPlatformApplication {
 
 
             // Add companies
+
+            Set<DayOfWeek> workDays = new HashSet<>();
+            workDays.add(DayOfWeek.MONDAY);
+            workDays.add(DayOfWeek.WEDNESDAY);
+
             Company company1 = new Company("SparkleClean Services", "Cleaning", "Exceptional cleaning solutions for a sparkling environment. We transform spaces into pristine havens.", LocalTime.of(8, 0), LocalTime.of(16, 0));
             company1.setPhone("1234567890");
             company1.setAddress(address6);
+            company1.setWorkDays(workDays);
 
             Company company2 = new Company("ArtisanCraft Creations", "Carpentry", "Crafting excellence in every piece. Our skilled carpenters bring your visions to life with precision and creativity.", LocalTime.of(8, 0), LocalTime.of(16, 0));
             company2.setPhone("9876543210");
@@ -168,10 +177,6 @@ public class ServiceProviderPlatformApplication {
             admin5.addRole(companyAdminRole);
             admin5.setConfirmPassword(secret);
             adminRepository.save(admin5);
-
-//            Set<DayOfWeek> workDays = new HashSet<>();
-//            workDays.add(DayOfWeek.MONDAY);
-//            workDays.add(DayOfWeek.WEDNESDAY);
 
             // Add customers
             Customer custome1 = new Customer("Mark User", "user1@gmail.com", secret, secret, true, address5, "9990001112");
