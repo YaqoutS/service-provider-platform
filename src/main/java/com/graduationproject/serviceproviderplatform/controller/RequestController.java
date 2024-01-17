@@ -40,9 +40,29 @@ public class RequestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Request>> getAllRequests() {
-        List<Request> requests = requestRepository.findAll();
-        return ResponseEntity.ok(requests);
+    public ResponseEntity<List<Request>> getAllRequests( @RequestParam(required = false) Long customerId,
+                                                         @RequestParam(required = false) String status) {
+        List<Request> requests;
+
+        if (customerId != null && status != null) {
+            // Fetch requests by customer id and status
+            requests = requestRepository.findByCustomer_IdAndStatus(customerId, status);
+        } else if (customerId != null) {
+            // Fetch requests by customer id
+            requests = requestRepository.findByCustomer_Id(customerId);
+        } else if (status != null) {
+            // Fetch requests by status
+            requests = requestRepository.findByStatus(status);
+        } else {
+            // Fetch all requests
+            requests = requestRepository.findAll();
+        }
+
+        if (requests.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(requests);
     }
 
     @GetMapping("/{id}")
