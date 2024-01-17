@@ -53,9 +53,10 @@ public class CompanyController {
         if(id != company.getId()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The id in the Url is different from the one in the body");
         }
-        if(companyRepository.existsByName(company.getName())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Name is already in use");
-        }
+//        Optional<Company> existingCompany = companyRepository.findByName(company.getName());
+//        if(existingCompany.isPresent() && existingCompany.get().getId() != id) {
+//            return ResponseEntity.status(HttpStatus.CONFLICT).body("Name is already in use");
+//        }
         Optional<Company> optionalCompany = companyRepository.findById(id);
         if(optionalCompany.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no company with id = " + id);
