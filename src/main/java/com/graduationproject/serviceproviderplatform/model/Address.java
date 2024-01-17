@@ -18,15 +18,22 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NonNull
     private String city;
 
-    @NonNull
     private String line1;
 
-    @NonNull
     private String line2;
 
-    @NonNull
     private String postalCode;
+
+    private Long latitude;
+
+    private Long longitude;
+
+    public Address(String city, String line1, String line2, String postalCode) {
+        this.city = city;
+        this.line1 = line1;
+        this.line2 = line2;
+        this.postalCode = postalCode;
+    }
 }
