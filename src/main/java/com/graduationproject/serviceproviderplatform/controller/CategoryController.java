@@ -35,6 +35,7 @@ public class CategoryController {
     private ServiceInputRepository serviceInputRepository;
     private InputService inputService;
     private EmployeeRepository employeeRepository;
+    private SupplyRepository supplyRepository;
 
     public CategoryController(CategoryRepository categoryRepository,
                               CategoryService categoryService,
@@ -45,7 +46,8 @@ public class CategoryController {
                               OptionService optionService,
                               ServiceInputRepository serviceInputRepository,
                               InputService inputService,
-                              EmployeeRepository employeeRepository) {
+                              EmployeeRepository employeeRepository,
+                              SupplyRepository supplyRepository) {
         this.categoryRepository = categoryRepository;
         this.categoryService = categoryService;
         this.companyRepository = companyRepository;
@@ -56,6 +58,7 @@ public class CategoryController {
         this.serviceInputRepository = serviceInputRepository;
         this.inputService = inputService;
         this.employeeRepository = employeeRepository;
+        this.supplyRepository = supplyRepository;
     }
 
     @GetMapping
@@ -180,6 +183,13 @@ public class CategoryController {
             input.setService(service);
             serviceInputRepository.save(input);
         }
+        for (Supply supply : service.getSupplies()) {
+            if (!serviceRepository.existsById(supply.getId())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There is no supply with id = " + supply.getId());
+            }
+            service.addSupply(supply);
+        }
+        serviceRepository.save(service);
         return ResponseEntity.status(HttpStatus.OK).body("Service added successfully with id = " + service.getId());
     }
 

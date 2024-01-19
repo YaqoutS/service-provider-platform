@@ -61,6 +61,14 @@ public class Service {
     @OneToMany(mappedBy = "service", cascade = CascadeType.ALL)
     private List<ServiceInput> serviceInputs = new ArrayList<>();
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "services_supplies",
+            joinColumns = @JoinColumn(name = "service_id",referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "supply_id",referencedColumnName = "id")
+    )
+    private List<Supply> supplies = new ArrayList<>();
+
     @OneToMany(mappedBy = "service", cascade = CascadeType.ALL)
     @JsonIgnore
     @ToString.Exclude
@@ -80,5 +88,13 @@ public class Service {
 
     public void removeEmployee(Employee employee) {
         employees.remove(employee);
+    }
+
+    public void addSupply (Supply supply) {
+        supplies.add(supply);
+    }
+
+    public void removeSupply (Supply supply) {
+        supplies.remove(supply);
     }
 }

@@ -22,7 +22,12 @@ public class ServiceService {
     public void delete(Service service) {
         for (Employee employee : service.getEmployees()) {
             employee.removeService(service);
-        } // I think there is no need for the three following loops because I added CascadeType.ALL
+        }
+
+        for (Supply supply : service.getSupplies()) {
+            supply.removeService(service);
+        }
+// I think there is no need for the three following loops because I added CascadeType.ALL
 //        for (ServiceOption option: service.getServiceOptions()) {
 //            optionService.delete(option);
 //        }
