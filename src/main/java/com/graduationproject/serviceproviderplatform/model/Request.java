@@ -3,6 +3,7 @@ package com.graduationproject.serviceproviderplatform.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,6 +36,8 @@ public class Request {
 
     @NonNull
     private Long price;
+
+    private LocalDateTime createdAt;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "feedback_id", referencedColumnName = "id")

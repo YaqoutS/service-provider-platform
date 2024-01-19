@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -115,6 +116,7 @@ public class RequestController {
             request.setEmployee(employee);
         }
 
+        request.setCreatedAt(LocalDateTime.now());
         request = requestRepository.save(request);
 
         for (OptionChoice choice : requestDTO.getOptionChoices()) {

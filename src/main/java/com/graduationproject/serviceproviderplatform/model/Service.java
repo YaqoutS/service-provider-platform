@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,6 +52,8 @@ public class Service {
 
     @NonNull
     private Long avgPrice;
+
+    private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "service", cascade = CascadeType.ALL)
     private List<ServiceOption> serviceOptions = new ArrayList<>();

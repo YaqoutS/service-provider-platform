@@ -15,6 +15,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -165,9 +166,12 @@ public class CategoryController {
             if(s.getCategory().getId() == categoryId)
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("Service already exists in this category");
         }
+
         Category category = categoryRepository.findById(categoryId).get();
         service.setCategory(category);
+        service.setCreatedAt(LocalDateTime.now());
         service = serviceRepository.save(service);
+
         for (ServiceOption option: service.getServiceOptions()) {
             option.setService(service);
             serviceOptionRepository.save(option);
