@@ -70,6 +70,10 @@ public class User {
 
     private LocalDateTime lastLogin;
 
+    private String chatToken;
+
+    private String notificationToken;
+
     @ToString.Exclude
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
