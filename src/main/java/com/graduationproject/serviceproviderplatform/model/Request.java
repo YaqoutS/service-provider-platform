@@ -49,6 +49,9 @@ public class Request {
     @OneToMany(mappedBy = "request", cascade = CascadeType.ALL)
     private List<InputChoice> inputChoices = new ArrayList<>();
 
+    @OneToMany(mappedBy = "request", cascade = CascadeType.ALL)
+    private List<SupplyChoice> supplyChoices = new ArrayList<>();
+
     public Request(RequestDTO requestDTO) {
         this.appointment = requestDTO.getAppointment();
         this.feedback = requestDTO.getFeedback();

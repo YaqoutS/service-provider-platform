@@ -27,8 +27,9 @@ public class RequestController {
     private FeedbackService feedbackService;
     private OptionChoiceRepository optionChoiceRepository;
     private InputChoiceRepository inputChoiceRepository;
+    private SupplyChoiceRepository supplyChoiceRepository;
 
-    public RequestController(RequestRepository requestRepository, RequestService requestService, ServiceRepository serviceRepository, EmployeeRepository employeeRepository, CustomerRepository customerRepository, ServiceFeedbackRepository feedbackRepository, FeedbackService feedbackService, OptionChoiceRepository optionChoiceRepository, InputChoiceRepository inputChoiceRepository) {
+    public RequestController(RequestRepository requestRepository, RequestService requestService, ServiceRepository serviceRepository, EmployeeRepository employeeRepository, CustomerRepository customerRepository, ServiceFeedbackRepository feedbackRepository, FeedbackService feedbackService, OptionChoiceRepository optionChoiceRepository, InputChoiceRepository inputChoiceRepository, SupplyChoiceRepository supplyChoiceRepository) {
         this.requestRepository = requestRepository;
         this.requestService = requestService;
         this.serviceRepository = serviceRepository;
@@ -38,6 +39,7 @@ public class RequestController {
         this.feedbackService = feedbackService;
         this.optionChoiceRepository = optionChoiceRepository;
         this.inputChoiceRepository = inputChoiceRepository;
+        this.supplyChoiceRepository = supplyChoiceRepository;
     }
 
     @GetMapping
@@ -126,6 +128,10 @@ public class RequestController {
         for (InputChoice choice : requestDTO.getInputChoices()) {
             choice.setRequest(request);
             inputChoiceRepository.save(choice);
+        }
+        for (SupplyChoice choice : requestDTO.getSupplyChoices()) {
+            choice.setRequest(request);
+            supplyChoiceRepository.save(choice);
         }
         return ResponseEntity.status(HttpStatus.CREATED).body("Request created successfully with id = " + request.getId());
     }

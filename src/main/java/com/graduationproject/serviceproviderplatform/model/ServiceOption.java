@@ -30,6 +30,8 @@ public class ServiceOption {
     @ToString.Exclude
     private Service service;
 
-//    @OneToMany(mappedBy = "option", cascade = CascadeType.ALL)
-//    private List<OptionChoice> optionChoices = new ArrayList<>();
+    @ToString.Exclude
+    @JsonIgnore
+    @OneToMany(mappedBy = "option", cascade = CascadeType.ALL)
+    private List<OptionChoice> optionChoices = new ArrayList<>();
 }

@@ -29,6 +29,8 @@ public class ServiceInput {
     @ToString.Exclude
     private Service service;
 
+    @ToString.Exclude
+    @JsonIgnore
     @OneToMany(mappedBy = "input", cascade = CascadeType.ALL)
     private List<InputChoice> inputChoices = new ArrayList<>();
 }

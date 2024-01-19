@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -24,6 +26,11 @@ public class Supply extends ServiceOption {
     @ToString.Exclude
     @JsonIgnore
     private Set<Service> services = new HashSet<>();
+
+    @ToString.Exclude
+    @JsonIgnore
+    @OneToMany(mappedBy = "supply", cascade = CascadeType.ALL)
+    private List<SupplyChoice> supplyChoices = new ArrayList<>();
 
     public void addService(Service service) {
         services.add(service);

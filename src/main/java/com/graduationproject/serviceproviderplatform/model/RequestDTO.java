@@ -35,4 +35,7 @@ public class RequestDTO {
 
     @NonNull
     private List<InputChoice> inputChoices = new ArrayList<>();
+
+    @NonNull
+    private List<SupplyChoice> supplyChoices = new ArrayList<>();
 }
