@@ -177,5 +177,12 @@ public class EmployeeController {
         return ResponseEntity.ok(holidayDays);
     }
 
-
+    @GetMapping("/{id}/supplies")
+    public ResponseEntity<List<Supply>> getEmployeeSupplies(@PathVariable Long id) {
+        if(!employeeRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        Employee employee = employeeRepository.findById(id).get();
+        return ResponseEntity.ok(employee.getSupplies());
+    }
 }

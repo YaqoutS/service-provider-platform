@@ -1,9 +1,7 @@
 package com.graduationproject.serviceproviderplatform.controller;
 
-import com.graduationproject.serviceproviderplatform.model.Category;
-import com.graduationproject.serviceproviderplatform.model.Company;
-import com.graduationproject.serviceproviderplatform.model.Employee;
-import com.graduationproject.serviceproviderplatform.model.Request;
+import com.graduationproject.serviceproviderplatform.model.*;
+import com.graduationproject.serviceproviderplatform.repository.AdminRepository;
 import com.graduationproject.serviceproviderplatform.repository.CompanyRepository;
 import com.graduationproject.serviceproviderplatform.service.CompanyService;
 import jakarta.validation.Valid;
@@ -23,10 +21,12 @@ import java.util.Set;
 @CrossOrigin
 public class CompanyController {
     private CompanyRepository companyRepository;
+    private AdminRepository adminRepository;
     private CompanyService companyService;
 
-    public CompanyController(CompanyRepository companyRepository, CompanyService companyService) {
+    public CompanyController(CompanyRepository companyRepository, AdminRepository adminRepository, CompanyService companyService) {
         this.companyRepository = companyRepository;
+        this.adminRepository = adminRepository;
         this.companyService = companyService;
     }
 
@@ -138,6 +138,16 @@ public class CompanyController {
         Set<DayOfWeek> holidayDays = EnumSet.allOf(DayOfWeek.class);
         holidayDays.removeAll(workDays);
         return ResponseEntity.ok(holidayDays);
+    }
+
+    @GetMapping("/{id}/supplies")
+    public ResponseEntity<List<Supply>> getCompanySupplies(@PathVariable Long id) {
+        if(!companyRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        Company company = companyRepository.findById(id).get();
+        Admin admin = adminRepository.findByCompany(company).get();
+        return ResponseEntity.ok(admin.getSupplies());
     }
 
 }
