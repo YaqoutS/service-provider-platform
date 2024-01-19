@@ -1,8 +1,6 @@
 package com.graduationproject.serviceproviderplatform.service;
 
-import com.graduationproject.serviceproviderplatform.model.Category;
-import com.graduationproject.serviceproviderplatform.model.Company;
-import com.graduationproject.serviceproviderplatform.model.Employee;
+import com.graduationproject.serviceproviderplatform.model.*;
 import com.graduationproject.serviceproviderplatform.repository.AdminRepository;
 import com.graduationproject.serviceproviderplatform.repository.CompanyRepository;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,13 +12,15 @@ public class CompanyService {
     private CategoryService categoryService;
     private EmployeeService employeeService;
     private RequestService requestService;
+    private SupplyService supplyService;
 
-    public CompanyService(CompanyRepository companyRepository, AdminRepository adminRepository, CategoryService categoryService, EmployeeService employeeService, RequestService requestService) {
+    public CompanyService(CompanyRepository companyRepository, AdminRepository adminRepository, CategoryService categoryService, EmployeeService employeeService, RequestService requestService, SupplyService supplyService) {
         this.companyRepository = companyRepository;
         this.adminRepository = adminRepository;
         this.categoryService = categoryService;
         this.employeeService = employeeService;
         this.requestService = requestService;
+        this.supplyService = supplyService;
     }
 
     @Transactional
@@ -31,7 +31,11 @@ public class CompanyService {
         for (Employee employee : company.getEmployees()) {
             employeeService.delete(employee);
         }
-        adminRepository.deleteByFullName(company.getName()); // The admin for a company has name similar to its name
+        Admin admin = adminRepository.findByCompany(company).get();
+        for (Supply supply : admin.getSupplies()) {
+            supplyService.delete(supply);
+        }
+        adminRepository.delete(admin);
         companyRepository.delete(company);
     }
 }

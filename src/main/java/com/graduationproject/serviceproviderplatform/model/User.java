@@ -1,5 +1,6 @@
 package com.graduationproject.serviceproviderplatform.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.graduationproject.serviceproviderplatform.model.validator.PasswordMatch;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Past;
@@ -79,6 +80,8 @@ public class User {
     private Set<Role> roles = new HashSet<>();
 
     @OneToMany(mappedBy = "user")
+    @ToString.Exclude
+    @JsonIgnore
     private List<Supply> supplies = new ArrayList<>();
 
     public User(String name, String email, String password, String confirmPassword, boolean enabled, Address address, String phone) {

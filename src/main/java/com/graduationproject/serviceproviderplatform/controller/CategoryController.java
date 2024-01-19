@@ -91,10 +91,10 @@ public class CategoryController {
         if(optionalCategory.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no category with id = " + category.getId());
         }
-        Optional<Category> existingCategory = categoryRepository.findByName(category.getName());
-        if(existingCategory.isPresent() && existingCategory.get().getId() != id) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Name is already in use");
-        }
+//        Optional<Category> existingCategory = categoryRepository.findByName(category.getName());
+//        if(existingCategory.isPresent() && existingCategory.get().getId() != id) {
+//            return ResponseEntity.status(HttpStatus.CONFLICT).body("Name is already in use");
+//        }
         Category updatedCategory = optionalCategory.get();
         updatedCategory.setName(category.getName());
         updatedCategory.setImage(category.getImage());

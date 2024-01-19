@@ -100,7 +100,7 @@ public class EmployeeController {
     }
 
     @PutMapping("/{employeeId}/add-service/{serviceId}")
-    public ResponseEntity<String> updateEmployee(@PathVariable Long employeeId, @PathVariable Long serviceId) {
+    public ResponseEntity<String> addServiceToEmployee(@PathVariable Long employeeId, @PathVariable Long serviceId) {
 
         if(!employeeRepository.existsById(employeeId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no employee with id = " + employeeId);
