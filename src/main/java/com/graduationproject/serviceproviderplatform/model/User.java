@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.HashSet;
 import java.util.Set;
@@ -64,6 +65,8 @@ public class User {
     @Column(nullable = false)
     private boolean enabled;
 
+    private LocalDateTime lastLogin;
+
     @ToString.Exclude
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -82,7 +85,6 @@ public class User {
         this.address = address;
         this.phone = phone;
     }
-
 
     @PostLoad
     private void calculateAge() {

@@ -11,6 +11,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @CrossOrigin
@@ -55,15 +57,27 @@ public class AuthController {
         Optional<User> user = userRepository.findByEmail(userDTO.getEmail());
 
         if (admin.isPresent() && checkPassword(user.get().getPassword(), userDTO.getPassword())) {
+            admin.get().setLastLogin(LocalDateTime.now());
+            admin.get().setConfirmPassword(admin.get().getPassword());
+            adminRepository.save(admin.get());
             System.out.println("Successful - Admin for company with id: " + admin.get().getCompany().getId());
             return ResponseEntity.ok(new UserDTO(admin.get()));
         } else if (customer.isPresent() && checkPassword(customer.get().getPassword(), userDTO.getPassword())) {
+            customer.get().setLastLogin(LocalDateTime.now());
+            customer.get().setConfirmPassword(customer.get().getPassword());
+            customerRepository.save(customer.get());
             System.out.println("Successful - customer");
             return ResponseEntity.ok(new UserDTO(customer.get()));
         } else if (employee.isPresent() && checkPassword(employee.get().getPassword(), userDTO.getPassword())) {
+            employee.get().setLastLogin(LocalDateTime.now());
+            employee.get().setConfirmPassword(employee.get().getPassword());
+            employeeRepository.save(employee.get());
             System.out.println("Successful - employee");
             return ResponseEntity.ok(new UserDTO(employee.get()));
         } else if(user.isPresent() && checkPassword(user.get().getPassword(), userDTO.getPassword())) {
+            user.get().setLastLogin(LocalDateTime.now());
+            user.get().setConfirmPassword(user.get().getPassword());
+            userRepository.save(user.get());
             System.out.println("Successful - ADMIN"); // Then this will be the main admin
             return ResponseEntity.ok(new UserDTO(user.get()));
         } else {
