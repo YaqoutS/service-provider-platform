@@ -44,7 +44,7 @@ public class ServiceController {
         if(!serviceRepository.existsById(serviceId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no service with id = " + serviceId);
         }
-        if(!serviceRepository.existsById(supplyId)) {
+        if(!supplyRepository.existsById(supplyId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no supply with id = " + supplyId);
         }
 
@@ -52,7 +52,7 @@ public class ServiceController {
         Supply supply = supplyRepository.findById(supplyId).get();
         service.addSupply(supply);
         supply.addService(service);
-
+        serviceRepository.save(service);
         return ResponseEntity.status(HttpStatus.OK).body("Supply added successfully");
     }
 }

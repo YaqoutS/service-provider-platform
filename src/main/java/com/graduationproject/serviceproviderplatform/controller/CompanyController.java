@@ -150,4 +150,13 @@ public class CompanyController {
         return ResponseEntity.ok(admin.getSupplies());
     }
 
+    @GetMapping("/{id}/admin")
+    public ResponseEntity<Admin> getCompanyAdmin(@PathVariable Long id) {
+        if(!companyRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        Company company = companyRepository.findById(id).get();
+        Admin admin = adminRepository.findByCompany(company).get();
+        return ResponseEntity.ok(admin);
+    }
 }
