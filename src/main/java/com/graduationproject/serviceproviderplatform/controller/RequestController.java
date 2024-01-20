@@ -148,6 +148,7 @@ public class RequestController {
 
         Request updatedRequest = optionalRequest.get();
         updatedRequest.setStatus(requestDTO.getStatus());
+        updatedRequest.setPrice(requestDTO.getPrice());
 
         // Update the appointment
         if(updatedRequest.getAppointment() == null || requestDTO.getAppointment() == null) {

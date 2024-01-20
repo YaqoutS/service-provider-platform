@@ -56,6 +56,7 @@ public class Request {
         this.appointment = requestDTO.getAppointment();
         this.feedback = requestDTO.getFeedback();
         this.status = requestDTO.getStatus();
+        this.price = requestDTO.getPrice();
         this.optionChoices = requestDTO.getOptionChoices();
         this.inputChoices = requestDTO.getInputChoices();
     }

@@ -28,7 +28,9 @@ public class RequestDTO {
 
     private ServiceFeedback feedback;
 
-    private String status; // suspended completed inComplete
+    private String status;
+
+    private Long price;
 
     @NonNull
     private List<OptionChoice> optionChoices = new ArrayList<>();
