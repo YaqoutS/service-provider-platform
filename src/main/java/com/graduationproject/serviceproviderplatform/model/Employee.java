@@ -21,8 +21,6 @@ public class Employee extends User {
 
     @ManyToOne
     @JoinColumn(name = "company_id")
-    @JsonIgnore
-    @ToString.Exclude
     private Company company; //if it is null, the employee doesn't belong to a company
 
     @Transient
