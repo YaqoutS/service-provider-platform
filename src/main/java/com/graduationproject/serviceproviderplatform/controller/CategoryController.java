@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -157,6 +158,7 @@ public class CategoryController {
     }
 
     @PostMapping("/{categoryId}/services")
+    @Transactional
     public ResponseEntity<String> addNewService(@PathVariable Long categoryId, @Valid @RequestBody Service service, BindingResult bindingResult) {
         if(bindingResult.hasErrors()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
@@ -183,12 +185,16 @@ public class CategoryController {
             input.setService(service);
             serviceInputRepository.save(input);
         }
+
+        List<Supply> suppliesToAdd = new ArrayList<>();
         for (Supply supply : service.getSupplies()) {
-            if (!serviceRepository.existsById(supply.getId())) {
+            if (!supplyRepository.existsById(supply.getId())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There is no supply with id = " + supply.getId());
             }
-            service.addSupply(supply);
+            suppliesToAdd.add(supply);
         }
+        service.addSupplies(suppliesToAdd);
+
         serviceRepository.save(service);
         return ResponseEntity.status(HttpStatus.OK).body("Service added successfully with id = " + service.getId());
     }

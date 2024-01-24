@@ -97,4 +97,8 @@ public class Service {
     public void removeSupply (Supply supply) {
         supplies.remove(supply);
     }
+
+    public void addSupplies(List<Supply> supplies) {
+        supplies.addAll(supplies);
+    }
 }
