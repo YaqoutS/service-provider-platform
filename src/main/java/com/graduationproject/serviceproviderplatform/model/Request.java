@@ -6,6 +6,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @RequiredArgsConstructor
@@ -59,5 +60,9 @@ public class Request {
         this.price = requestDTO.getPrice();
         this.optionChoices = requestDTO.getOptionChoices();
         this.inputChoices = requestDTO.getInputChoices();
+    }
+
+    public List<OptionChoice> getOptionChoices() {
+        return optionChoices.stream().filter(optionChoice -> optionChoice.getOption().getService() != null).collect(Collectors.toList());
     }
 }
