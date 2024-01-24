@@ -7,6 +7,7 @@ import com.graduationproject.serviceproviderplatform.service.RequestService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,8 +29,9 @@ public class RequestController {
     private OptionChoiceRepository optionChoiceRepository;
     private InputChoiceRepository inputChoiceRepository;
     private SupplyChoiceRepository supplyChoiceRepository;
+    private AddressRepository addressRepository;
 
-    public RequestController(RequestRepository requestRepository, RequestService requestService, ServiceRepository serviceRepository, EmployeeRepository employeeRepository, CustomerRepository customerRepository, ServiceFeedbackRepository feedbackRepository, FeedbackService feedbackService, OptionChoiceRepository optionChoiceRepository, InputChoiceRepository inputChoiceRepository, SupplyChoiceRepository supplyChoiceRepository) {
+    public RequestController(RequestRepository requestRepository, RequestService requestService, ServiceRepository serviceRepository, EmployeeRepository employeeRepository, CustomerRepository customerRepository, ServiceFeedbackRepository feedbackRepository, FeedbackService feedbackService, OptionChoiceRepository optionChoiceRepository, InputChoiceRepository inputChoiceRepository, SupplyChoiceRepository supplyChoiceRepository, AddressRepository addressRepository) {
         this.requestRepository = requestRepository;
         this.requestService = requestService;
         this.serviceRepository = serviceRepository;
@@ -40,6 +42,7 @@ public class RequestController {
         this.optionChoiceRepository = optionChoiceRepository;
         this.inputChoiceRepository = inputChoiceRepository;
         this.supplyChoiceRepository = supplyChoiceRepository;
+        this.addressRepository = addressRepository;
     }
 
     @GetMapping
@@ -94,7 +97,7 @@ public class RequestController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
         }
         Request request = new Request(requestDTO);  // service, employee, customer
-        request.setStatus("suspended");
+        request.setStatus("Pending");
 
         if (!serviceRepository.existsById(requestDTO.getServiceId())) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no service with id = " + requestDTO.getServiceId());
@@ -137,6 +140,7 @@ public class RequestController {
     }
 
     @PutMapping("/{id}")
+    @Transactional
     public ResponseEntity<String> updateRequest(@PathVariable Long id, @Valid @RequestBody RequestDTO requestDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
@@ -147,7 +151,10 @@ public class RequestController {
         }
 
         Request updatedRequest = optionalRequest.get();
+        // Update status
         updatedRequest.setStatus(requestDTO.getStatus());
+
+        // Update price
         updatedRequest.setPrice(requestDTO.getPrice());
 
         // Update the appointment
@@ -159,7 +166,13 @@ public class RequestController {
             updatedRequest.getAppointment().setEndDate(requestDTO.getAppointment().getEndDate());
             updatedRequest.getAppointment().setStartTime(requestDTO.getAppointment().getStartTime());
             updatedRequest.getAppointment().setEndTime(requestDTO.getAppointment().getEndTime());
-            updatedRequest.getAppointment().setAddress(requestDTO.getAppointment().getAddress());
+//            Optional<Address> address = addressRepository.findById(requestDTO.getAppointment().getAddress().getId());
+//            if (address.isPresent()) {
+//                updatedRequest.getAppointment().setAddress(address.get());
+//            } else {
+//                //updatedRequest.getAppointment().setAddress(requestDTO.getAppointment().getAddress());
+//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no address with the specified id");
+//            }
         }
 
         // Update the employee
