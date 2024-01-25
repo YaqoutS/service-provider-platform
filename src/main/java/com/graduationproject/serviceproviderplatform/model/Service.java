@@ -38,8 +38,6 @@ public class Service {
     private Category category;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JsonIgnore
-    @ToString.Exclude
     @JoinTable(
             name = "employee_services",
             joinColumns = @JoinColumn(name = "service_id", referencedColumnName = "id"),
