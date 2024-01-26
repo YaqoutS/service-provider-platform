@@ -9,11 +9,19 @@ import com.graduationproject.serviceproviderplatform.service.ServiceService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -37,6 +45,7 @@ public class CategoryController {
     private InputService inputService;
     private EmployeeRepository employeeRepository;
     private SupplyRepository supplyRepository;
+    private final ResourceLoader resourceLoader;
 
     public CategoryController(CategoryRepository categoryRepository,
                               CategoryService categoryService,
@@ -48,7 +57,8 @@ public class CategoryController {
                               ServiceInputRepository serviceInputRepository,
                               InputService inputService,
                               EmployeeRepository employeeRepository,
-                              SupplyRepository supplyRepository) {
+                              SupplyRepository supplyRepository,
+                              ResourceLoader resourceLoader) {
         this.categoryRepository = categoryRepository;
         this.categoryService = categoryService;
         this.companyRepository = companyRepository;
@@ -60,6 +70,7 @@ public class CategoryController {
         this.inputService = inputService;
         this.employeeRepository = employeeRepository;
         this.supplyRepository = supplyRepository;
+        this.resourceLoader = resourceLoader;
     }
 
     @GetMapping
@@ -105,10 +116,10 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<String> createCategory(@Valid @RequestBody CategoryDTO categoryDTO, BindingResult bindingResult) {
+    public ResponseEntity<CategoryResponseDTO> createCategory(@Valid @RequestBody CategoryDTO categoryDTO, BindingResult bindingResult) {
         System.out.println(categoryDTO);
         if(bindingResult.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new CategoryResponseDTO(null,"Bad request"));
         }
         System.out.println("Category: " + categoryDTO);
 //        if(categoryRepository.findByName(categoryDTO.getName()).isPresent()) {
@@ -119,7 +130,7 @@ public class CategoryController {
             category.setCompany(companyRepository.findById(categoryDTO.getCompanyId()).get());
         }
         category = categoryRepository.save(category);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Category created successfully with id = " + category.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(new CategoryResponseDTO(null,"Category created successfully with id = " + category.getId()));
     }
 
     //@Secured({"ROLE_ADMIN"})
@@ -466,5 +477,28 @@ public class CategoryController {
         }
         Collections.sort(availableTimes);
         return availableTimes;
+    }
+
+    @PostMapping("/{categoryId}/uploadImage")
+    public ResponseEntity<String> handleFileUpload(@RequestParam("image") MultipartFile image, @PathVariable Long categoryId) {
+        System.out.println("image recieved");
+        Category category = categoryRepository.findById(categoryId).get();
+        Image categoryImage=new Image("categoryImages/" + categoryId.intValue() + ".jpg");
+        category.setImage(categoryImage);
+        categoryRepository.save(category);
+        try {
+            URI resourceUri = resourceLoader.getResource("classpath:").getURI();
+            String decodedResourcePath = resourceUri.getPath();
+            String ServiceImagesRoot = decodedResourcePath.substring(1);
+            String relativePath = "assets/categoryImages/" + categoryId.intValue() + ".jpg";
+            System.out.println(ServiceImagesRoot+relativePath);
+            Path absolutePath = Paths.get(ServiceImagesRoot+relativePath);
+            Files.write(absolutePath, image.getBytes());
+            return ResponseEntity.ok("Image uploaded successfully. Path: " + relativePath);
+        } catch (IOException e) {
+            System.out.println(e);
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(500).body("Error uploading image: " + e.getMessage());
+        }
     }
 }

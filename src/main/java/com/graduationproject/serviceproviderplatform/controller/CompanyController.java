@@ -5,10 +5,18 @@ import com.graduationproject.serviceproviderplatform.repository.AdminRepository;
 import com.graduationproject.serviceproviderplatform.repository.CompanyRepository;
 import com.graduationproject.serviceproviderplatform.service.CompanyService;
 import jakarta.validation.Valid;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import java.time.DayOfWeek;
 import java.util.EnumSet;
@@ -23,11 +31,13 @@ public class CompanyController {
     private CompanyRepository companyRepository;
     private AdminRepository adminRepository;
     private CompanyService companyService;
+    private final ResourceLoader resourceLoader;
 
-    public CompanyController(CompanyRepository companyRepository, AdminRepository adminRepository, CompanyService companyService) {
+    public CompanyController(CompanyRepository companyRepository, AdminRepository adminRepository, CompanyService companyService,ResourceLoader resourceLoader) {
         this.companyRepository = companyRepository;
         this.adminRepository = adminRepository;
         this.companyService = companyService;
+        this.resourceLoader = resourceLoader;
     }
 
     @GetMapping
@@ -158,5 +168,28 @@ public class CompanyController {
         Company company = companyRepository.findById(id).get();
         Admin admin = adminRepository.findByCompany(company).get();
         return ResponseEntity.ok(admin);
+    }
+
+    @PostMapping("/{companyId}/uploadImage")
+    public ResponseEntity<String> handleFileUpload(@RequestParam("image") MultipartFile image, @PathVariable Long companyId) {
+        System.out.println("image received");
+        Company company = companyRepository.findById(companyId).get();
+        Image companyImage=new Image("companiesImages/" + companyId.intValue() + ".jpg");
+        company.setImage(companyImage);
+        companyRepository.save(company);
+        try {
+            URI resourceUri = resourceLoader.getResource("classpath:").getURI();
+            String decodedResourcePath = resourceUri.getPath();
+            String ServiceImagesRoot = decodedResourcePath.substring(1);
+            String relativePath = "assets/companiesImages/" + companyId.intValue() + ".jpg";
+            System.out.println(ServiceImagesRoot+relativePath);
+            Path absolutePath = Paths.get(ServiceImagesRoot+relativePath);
+            Files.write(absolutePath, image.getBytes());
+            return ResponseEntity.ok("Image uploaded successfully. Path: " + relativePath);
+        } catch (IOException e) {
+            System.out.println(e);
+            System.out.println(e.getMessage());
+            return ResponseEntity.status(500).body("Error uploading image: " + e.getMessage());
+        }
     }
 }
