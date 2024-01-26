@@ -17,7 +17,6 @@ public class Image {
     @NonNull
     private String imageName;
 
-    @NonNull
     @Lob
     @Column(length = 100000)
     private byte[] imageData;
