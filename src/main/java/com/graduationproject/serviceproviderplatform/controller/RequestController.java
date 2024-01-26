@@ -46,33 +46,35 @@ public class RequestController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Request>> getAllRequests( @RequestParam(required = false) Long customerId,
-                                                         @RequestParam(required = false) Long employeeId,
-                                                         @RequestParam(required = false) String status) {
+    public ResponseEntity<List<Request>> getAllRequests(
+            @RequestParam(required = false) Long customerId,
+            @RequestParam(required = false) Long employeeId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Long serviceId) {
+
         List<Request> requests;
 
         if (customerId != null && status != null) {
-            // Fetch requests by customer id and status
             requests = requestRepository.findByCustomer_IdAndStatus(customerId, status);
-        } else if (customerId != null) {
-            // Fetch requests by customer id
+        } else if (status != null && employeeId != null && serviceId != null) {
+            requests = requestRepository.findByEmployee_IdAndStatusAndService_Id(employeeId, status,serviceId);
+        }else if (status != null && employeeId != null) {
+            requests = requestRepository.findByEmployee_IdAndStatus(employeeId, status);
+        }
+        else if ( employeeId != null && serviceId != null) {
+            requests = requestRepository.findByEmployee_IdAndService_Id(employeeId, serviceId);
+        }
+        else if (customerId != null) {
             requests = requestRepository.findByCustomer_Id(customerId);
-        } else if (status != null && employeeId != null) {
-            // Fetch requests by status
-            requests = requestRepository.findByEmployee_IdAndStatus(employeeId,status);
         }
-        else if(employeeId != null){
+        else if (employeeId != null) {
             requests = requestRepository.findByEmployee_Id(employeeId);
-
-        } else if(status != null ){
+        } else if (status != null) {
             requests = requestRepository.findByStatus(status);
-        } else {
-            // Fetch all requests
+        } else if (serviceId != null) {
+            requests = requestRepository.findByService_Id(serviceId);
+        }  else {
             requests = requestRepository.findAll();
-        }
-
-        if (requests.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(requests);
