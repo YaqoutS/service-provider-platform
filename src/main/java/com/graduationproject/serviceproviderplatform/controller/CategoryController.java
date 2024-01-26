@@ -159,24 +159,24 @@ public class CategoryController {
 
     @PostMapping("/{categoryId}/services")
     @Transactional
-    public ResponseEntity<String> addNewService(@PathVariable Long categoryId, @Valid @RequestBody Service service, BindingResult bindingResult) {
+    public ResponseEntity<ServiceResponseDTO> addNewService(@PathVariable Long categoryId, @Valid @RequestBody Service service, BindingResult bindingResult) {
         if(bindingResult.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ServiceResponseDTO(null,"Bad request"));
         }
         if(!categoryRepository.existsById(categoryId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no category with categoryId = " + categoryId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ServiceResponseDTO(null,"There is no category with categoryId = " + categoryId));
         }
         List<Service> services = serviceRepository.findAllByName(service.getName());
         for (Service s : services) {
             if(s.getCategory().getId() == categoryId)
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("Service already exists in this category");
+
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(new ServiceResponseDTO(null,"Service already exists in this category"));
         }
 
         Category category = categoryRepository.findById(categoryId).get();
         service.setCategory(category);
         service.setCreatedAt(LocalDateTime.now());
         service = serviceRepository.save(service);
-
         for (ServiceOption option: service.getServiceOptions()) {
             option.setService(service);
             serviceOptionRepository.save(option);
@@ -185,18 +185,17 @@ public class CategoryController {
             input.setService(service);
             serviceInputRepository.save(input);
         }
-
-        List<Supply> suppliesToAdd = new ArrayList<>();
         for (Supply supply : service.getSupplies()) {
-            if (!supplyRepository.existsById(supply.getId())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There is no supply with id = " + supply.getId());
+            if (!serviceRepository.existsById(supply.getId())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ServiceResponseDTO(null,"There is no supply with id = " + supply.getId()));
             }
-            suppliesToAdd.add(supply);
+            service.addSupply(supply);
         }
-        service.addSupplies(suppliesToAdd);
-
+        Image image = new Image("services/"+service.getId()+".jpg");
+        service.setImage(image);
         serviceRepository.save(service);
-        return ResponseEntity.status(HttpStatus.OK).body("Service added successfully with id = " + service.getId());
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ServiceResponseDTO(service,"service created successfully"));
     }
 
     @PutMapping("/{categoryId}/services/{serviceId}")
