@@ -78,7 +78,7 @@ public class UserController {
         Image userImage=new Image("usersImages/" + userId.intValue() + ".jpg");
         user.setImage(userImage);
         userRepository.save(user);
-        System.out.println("image recieved");
+        System.out.println("image received");
         try {
             URI resourceUri = resourceLoader.getResource("classpath:").getURI();
             String decodedResourcePath = resourceUri.getPath();
@@ -86,6 +86,7 @@ public class UserController {
             String relativePath = "assets/usersImages/" + userId.intValue() + ".jpg";
             System.out.println(ServiceImagesRoot+relativePath);
             Path absolutePath = Paths.get(ServiceImagesRoot+relativePath);
+            Files.createDirectories(absolutePath.getParent());
             Files.write(absolutePath, image.getBytes());
             return ResponseEntity.ok("Image uploaded successfully. Path: " + relativePath);
         } catch (IOException e) {

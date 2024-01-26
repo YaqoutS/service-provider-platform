@@ -184,6 +184,7 @@ public class CompanyController {
             String relativePath = "assets/companiesImages/" + companyId.intValue() + ".jpg";
             System.out.println(ServiceImagesRoot+relativePath);
             Path absolutePath = Paths.get(ServiceImagesRoot+relativePath);
+            Files.createDirectories(absolutePath.getParent());
             Files.write(absolutePath, image.getBytes());
             return ResponseEntity.ok("Image uploaded successfully. Path: " + relativePath);
         } catch (IOException e) {

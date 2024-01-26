@@ -96,6 +96,7 @@ public class CategoryController {
         if(bindingResult.hasErrors()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
         }
+        System.out.println("Category: " + category);
         if(id != category.getId()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The id in the Url is different from the one in the body");
         }
@@ -481,9 +482,9 @@ public class CategoryController {
 
     @PostMapping("/{categoryId}/uploadImage")
     public ResponseEntity<String> handleFileUpload(@RequestParam("image") MultipartFile image, @PathVariable Long categoryId) {
-        System.out.println("image recieved");
+        System.out.println("image received");
         Category category = categoryRepository.findById(categoryId).get();
-        Image categoryImage=new Image("categoryImages/" + categoryId.intValue() + ".jpg");
+        Image categoryImage = new Image("categoryImages/" + categoryId.intValue() + ".jpg");
         category.setImage(categoryImage);
         categoryRepository.save(category);
         try {
@@ -491,13 +492,15 @@ public class CategoryController {
             String decodedResourcePath = resourceUri.getPath();
             String ServiceImagesRoot = decodedResourcePath.substring(1);
             String relativePath = "assets/categoryImages/" + categoryId.intValue() + ".jpg";
-            System.out.println(ServiceImagesRoot+relativePath);
+            System.out.println( "ServiceImagesRoot + relativePath: " + ServiceImagesRoot+relativePath);
             Path absolutePath = Paths.get(ServiceImagesRoot+relativePath);
+            System.out.println("Absolute Path: " + absolutePath);
+            Files.createDirectories(absolutePath.getParent());
             Files.write(absolutePath, image.getBytes());
             return ResponseEntity.ok("Image uploaded successfully. Path: " + relativePath);
         } catch (IOException e) {
-            System.out.println(e);
-            System.out.println(e.getMessage());
+            System.out.println("IO Exception: " + e);
+            System.out.println("Error message: " + e.getMessage());
             return ResponseEntity.status(500).body("Error uploading image: " + e.getMessage());
         }
     }

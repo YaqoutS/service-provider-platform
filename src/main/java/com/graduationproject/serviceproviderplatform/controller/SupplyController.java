@@ -110,7 +110,7 @@ public class SupplyController {
 
     @PostMapping("/{supplyId}/uploadImage")
     public ResponseEntity<String> handleFileUpload(@RequestParam("image") MultipartFile image, @PathVariable String supplyId) {
-        System.out.println("image recieved");
+        System.out.println("image received");
         try {
             URI resourceUri = resourceLoader.getResource("classpath:").getURI();
             String decodedResourcePath = resourceUri.getPath();
@@ -118,6 +118,7 @@ public class SupplyController {
             String relativePath = "assets/suppliesImages/" + supplyId + ".jpg";
             System.out.println(ServiceImagesRoot+relativePath);
             Path absolutePath = Paths.get(ServiceImagesRoot+relativePath);
+            Files.createDirectories(absolutePath.getParent());
             Files.write(absolutePath, image.getBytes());
             return ResponseEntity.ok("Image uploaded successfully. Path: " + relativePath);
         } catch (IOException e) {

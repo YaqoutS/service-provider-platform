@@ -82,6 +82,7 @@ public class ServiceController {
             String relativePath = "assets/services/" + serviceId + ".jpg";
             System.out.println(ServiceImagesRoot + relativePath);
             Path absolutePath = Paths.get(ServiceImagesRoot + relativePath);
+            Files.createDirectories(absolutePath.getParent());
             Files.write(absolutePath, image.getBytes());
             return ResponseEntity.ok("Image uploaded successfully. Path: " + relativePath);
         } catch (IOException e) {
