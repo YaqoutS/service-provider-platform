@@ -24,6 +24,7 @@ public class ServiceProviderPlatformApplication {
 
 //    @Bean
 //    public CommandLineRunner initData(CategoryRepository categoryRepository,
+//                                      ServiceRepository serviceRepository,
 //                                      UserRepository userRepository,
 //                                      AdminRepository adminRepository,
 //                                      EmployeeRepository employeeRepository,
@@ -72,55 +73,7 @@ public class ServiceProviderPlatformApplication {
 //            Address address16 = new Address("Nablus", "Science Avenue", "Research Center", "001122");
 //            Address address17 = new Address("Nablus", "Science Avenue", "Flat 202", "001122");
 //
-//
-//            // Add categories
-//            Category category1 = new Category("Electricity");
-//            Category category2 = new Category("Construction and Contracting");
-//            Category category3 = new Category("Automotive Maintenance and Repair");
-//            Category category4 = new Category("Mobile and Tablet Repair");
-//            Category category5 = new Category("Furniture Moving");
-//            Category category6 = new Category("Water Transportation");
-//            Category category7 = new Category("Fuel Transportation");
-//            Category category8 = new Category("Computer System Maintenance");
-//            Category category9 = new Category("Cleaning");
-//            Category category10 = new Category("Painting and Coating");
-//            Category category11 = new Category("Plumbing");
-//            Category category12 = new Category("Blacksmithing and Welding");
-//            Category category13 = new Category("Tile and Parquet Installation");
-//            Category category14 = new Category("Carpentry and Furniture Restoration");
-//            Category category15 = new Category("Kitchen Installation and Maintenance");
-//            Category category16 = new Category("Bathroom Installation and Maintenance");
-//            Category category17 = new Category("Gardening");
-//            Category category18 = new Category("Door and Window Repair");
-//            Category category19 = new Category("General Maintenance");
-//            Category category20 = new Category("Home Care");
-//
-//            categoryRepository.save(category1);
-//            categoryRepository.save(category2);
-//            categoryRepository.save(category3);
-//            categoryRepository.save(category4);
-//            categoryRepository.save(category5);
-//            categoryRepository.save(category6);
-//            categoryRepository.save(category7);
-//            categoryRepository.save(category8);
-//            categoryRepository.save(category9);
-//            categoryRepository.save(category10);
-//            categoryRepository.save(category11);
-//            categoryRepository.save(category12);
-//            categoryRepository.save(category13);
-//            categoryRepository.save(category14);
-//            categoryRepository.save(category15);
-//            categoryRepository.save(category16);
-//            categoryRepository.save(category17);
-//            categoryRepository.save(category18);
-//            categoryRepository.save(category19);
-//            categoryRepository.save(category20);
-//
-//            // Add services
-//
-//
 //            // Add companies
-//
 //            Set<DayOfWeek> workDays = new HashSet<>();
 //            workDays.add(DayOfWeek.MONDAY);
 //            workDays.add(DayOfWeek.WEDNESDAY);
@@ -178,6 +131,98 @@ public class ServiceProviderPlatformApplication {
 //            admin5.setConfirmPassword(secret);
 //            adminRepository.save(admin5);
 //
+//            // Add categories
+//            Category category1 = new Category("Electricity");
+//            category1.setDescription("Providing electrical services such as wiring, installations, and repairs for homes and businesses.");
+//
+//            Category category2 = new Category("Construction and Contracting");
+//            category2.setDescription("Offering construction and contracting services for building and renovating structures.");
+//
+//            Category category3 = new Category("Automotive Maintenance and Repair");
+//            category3.setDescription("Specializing in the maintenance and repair of automobiles, ensuring optimal performance and safety.");
+//
+//            Category category4 = new Category("Mobile and Tablet Repair");
+//            category4.setDescription("Repairing mobile phones and tablets, including screen replacements and software troubleshooting.");
+//
+//            Category category5 = new Category("Furniture Moving");
+//            category5.setDescription("Assisting with the relocation of furniture and household items.");
+//
+//            Category category6 = new Category("Water Transportation");
+//            category6.setDescription("Providing water transportation services, such as boat rides or water-based tours.");
+//
+//            Category category7 = new Category("Fuel Transportation");
+//            category7.setDescription("Offering fuel transportation services for residential or commercial needs.");
+//
+//            Category category8 = new Category("Computer System Maintenance");
+//            category8.setDescription("Providing maintenance services for computer systems, including hardware and software support.");
+//
+//            Category category9 = new Category("Cleaning");
+//            category9.setDescription("Specializing in residential and commercial cleaning services for a tidy and sanitized environment.");
+//
+//            Category category10 = new Category("Painting and Coating");
+//            category10.setDescription("Offering professional painting and coating services for interiors and exteriors.");
+//
+//            Category category11 = new Category("Plumbing");
+//            category11.setDescription("Providing plumbing services, including installations, repairs, and maintenance.");
+//
+//            Category category12 = new Category("Blacksmithing and Welding");
+//            category12.setDescription("Crafting and repairing metal items through blacksmithing and welding techniques.");
+//
+//            Category category13 = new Category("Tile and Parquet Installation");
+//            category13.setDescription("Specializing in the installation of tiles and parquet flooring for homes and businesses.");
+//
+//            Category category14 = new Category("Carpentry and Furniture Restoration");
+//            category14.setDescription("Offering carpentry services and restoring furniture to its original or improved condition.");
+//
+//            Category category15 = new Category("Kitchen Installation and Maintenance");
+//            category15.setDescription("Providing services for the installation and maintenance of kitchen fixtures and appliances.");
+//
+//            Category category16 = new Category("Bathroom Installation and Maintenance");
+//            category16.setDescription("Specializing in the installation and maintenance of bathroom fixtures and plumbing.");
+//
+//            Category category17 = new Category("Gardening");
+//            category17.setDescription("Offering gardening services, including landscaping, planting, and maintenance.");
+//
+//            Category category18 = new Category("Door and Window Repair");
+//            category18.setDescription("Providing repair services for doors and windows, ensuring proper functionality and security.");
+//
+//            Category category19 = new Category("General Maintenance");
+//            category19.setDescription("Offering general maintenance services for homes and businesses.");
+//
+//            Category category20 = new Category("Home Care");
+//            category20.setDescription("Providing comprehensive home care services to ensure the well-being and comfort of residents.");
+//
+//            category1.setCompany(company1);
+//            category2.setCompany(company1);
+//            category3.setCompany(company1);
+//            category4.setCompany(company1);
+//
+//            categoryRepository.save(category1);
+//            categoryRepository.save(category2);
+//            categoryRepository.save(category3);
+//            categoryRepository.save(category4);
+//            categoryRepository.save(category5);
+//            categoryRepository.save(category6);
+//            categoryRepository.save(category7);
+//            categoryRepository.save(category8);
+//            categoryRepository.save(category9);
+//            categoryRepository.save(category10);
+//            categoryRepository.save(category11);
+//            categoryRepository.save(category12);
+//            categoryRepository.save(category13);
+//            categoryRepository.save(category14);
+//            categoryRepository.save(category15);
+//            categoryRepository.save(category16);
+//            categoryRepository.save(category17);
+//            categoryRepository.save(category18);
+//            categoryRepository.save(category19);
+//            categoryRepository.save(category20);
+//
+//            // Add services
+//            Service service1 = new Service("Cleaning Service", 1, "This is a cleaning service belong to category 9 (Cleaning)", category9, true, 54L);
+//            serviceRepository.save(service1);
+//
+//
 //            // Add customers
 //            Customer custome1 = new Customer("Mark User", "user1@gmail.com", secret, secret, true, address5, "9990001112");
 //            custome1.addRole(customerRole);
@@ -218,36 +263,34 @@ public class ServiceProviderPlatformApplication {
 //            employee5.setDateOfBirth(LocalDate.of(1990, 4, 5));
 //            employeeRepository.save(employee5);
 //
-//            Employee employee6 = new Employee("Sophia Employee", "employee6@example.com", secret, secret, true, company3, 9, address13, "5556677891");
+//            Employee employee6 = new Employee("Sophia Employee", "employee6@example.com", secret, secret, true, null, 9, address13, "5556677891");
 //            employee6.addRole(employeeRole);
 //            employee6.setDateOfBirth(LocalDate.of(1988, 9, 15));
 //            employeeRepository.save(employee6);
 //
 ////          -- Employees for  (RiseTech Elevators)
-//            Employee employee7 = new Employee("Matthew Employee", "employee7@example.com", secret, secret, true, company4, 5, address14, "1112233448");
+//            Employee employee7 = new Employee("Matthew Employee", "employee7@example.com", secret, secret, true, null, 5, address14, "1112233448");
 //            employee7.addRole(employeeRole);
 //            employee7.setDateOfBirth(LocalDate.of(1994, 2, 20));
 //            employeeRepository.save(employee7);
 //
-//            Employee employee8 = new Employee("Ava Employee", "employee8@example.com", secret, secret, true, company4, 8, address15, "5556677892");
+//            Employee employee8 = new Employee("Ava Employee", "employee8@example.com", secret, secret, true, null, 8, address15, "5556677892");
 //            employee8.addRole(employeeRole);
 //            employee8.setDateOfBirth(LocalDate.of(1996, 7, 10));
 //            employeeRepository.save(employee8);
 //
 ////          -- Employees for (TechPro Eperts)
-//            Employee employee9 = new Employee("Alex Employee", "employee9@example.com", secret, secret, true, company5, 5, address4, "1112233445");
+//            Employee employee9 = new Employee("Alex Employee", "employee9@example.com", secret, secret, true, null, 5, address4, "1112233445");
 //            employee9.addRole(employeeRole);
 //            employee9.setDateOfBirth(LocalDate.of(1995, 3, 10));
 //            employeeRepository.save(employee9);
 //
-//            Employee employee10 = new Employee("Emily Employee", "employee10@example.com", secret, secret, true, company5, 7, address3, "5556677889");
+//            Employee employee10 = new Employee("Emily Employee", "employee10@example.com", secret, secret, true, null, 7, address3, "5556677889");
 //            employee10.addRole(employeeRole);
 //            employee10.setDateOfBirth(LocalDate.of(1992, 8, 20));
 //            employeeRepository.save(employee10);
 //
 //            System.out.println("Initial data added successfully");
-//
-//
 //        };
 //    }
 }

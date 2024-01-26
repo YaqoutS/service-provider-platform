@@ -22,6 +22,8 @@ public class Category {
     @NonNull
     private String name;
 
+    private String description;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "image_id", referencedColumnName = "id")
     private Image image;
@@ -38,6 +40,7 @@ public class Category {
 
     public Category(CategoryDTO categoryDTO) {
         this.name = categoryDTO.getName();
+        this.description = categoryDTO.getDescription();
         this.image = categoryDTO.getImage();
     }
 

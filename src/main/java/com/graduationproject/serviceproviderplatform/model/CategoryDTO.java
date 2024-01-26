@@ -17,6 +17,8 @@ public class CategoryDTO {
     @NonNull
     private String name;
 
+    private String description;
+
     private Image image;
 
     private Long companyId;
@@ -24,6 +26,7 @@ public class CategoryDTO {
     public CategoryDTO(Category category) {
         this.id = category.getId();
         this.name = category.getName();
+        this.description = category.getDescription();
         this.image = category.getImage();
         this.companyId = category.getCompany() == null ? null: category.getCompany().getId();
     }
