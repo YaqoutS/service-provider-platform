@@ -94,10 +94,12 @@ public class CategoryController {
     @PutMapping("/{id}")
     public ResponseEntity<String> updateCategory(@PathVariable Long id, @Valid @RequestBody CategoryDTO category, BindingResult bindingResult) {
         if(bindingResult.hasErrors()) {
+            System.out.println(bindingResult.getAllErrors());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
         }
         System.out.println("Category: " + category);
-        if(id != category.getId()) {
+        System.out.println("Id: " + id);
+        if(!Objects.equals(id, category.getId())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The id in the Url is different from the one in the body");
         }
         Optional<Category> optionalCategory = categoryRepository.findById(id);
@@ -110,8 +112,10 @@ public class CategoryController {
 //        }
         Category updatedCategory = optionalCategory.get();
         updatedCategory.setName(category.getName());
-        updatedCategory.setImage(category.getImage());
+        updatedCategory.setDescription((category.getDescription()));
+//        updatedCategory.setImage(category.getImage());
         updatedCategory.setCompany(companyRepository.findById(category.getCompanyId()).get());
+        updatedCategory.setLastUpdated(LocalDateTime.now());
         categoryRepository.save(updatedCategory);
         return ResponseEntity.status(HttpStatus.OK).body("Category updated successfully");
     }
@@ -130,8 +134,9 @@ public class CategoryController {
         if (categoryDTO.getCompanyId() != null && companyRepository.existsById(categoryDTO.getCompanyId())) {
             category.setCompany(companyRepository.findById(categoryDTO.getCompanyId()).get());
         }
+        category.setLastUpdated(LocalDateTime.now());
         category = categoryRepository.save(category);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new CategoryResponseDTO(null,"Category created successfully with id = " + category.getId()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new CategoryResponseDTO(category,"Category created successfully with id = " + category.getId()));
     }
 
     //@Secured({"ROLE_ADMIN"})
@@ -188,6 +193,7 @@ public class CategoryController {
         Category category = categoryRepository.findById(categoryId).get();
         service.setCategory(category);
         service.setCreatedAt(LocalDateTime.now());
+        service.setLastUpdated(LocalDateTime.now());
         service = serviceRepository.save(service);
         for (ServiceOption option: service.getServiceOptions()) {
             option.setService(service);
@@ -197,13 +203,17 @@ public class CategoryController {
             input.setService(service);
             serviceInputRepository.save(input);
         }
+
+        List<Supply> suppliesToAdd = new ArrayList<>();
         for (Supply supply : service.getSupplies()) {
-            if (!serviceRepository.existsById(supply.getId())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ServiceResponseDTO(null,"There is no supply with id = " + supply.getId()));
+            if (!supplyRepository.existsById(supply.getId())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ServiceResponseDTO(null, "There is no supply with id = " + supply.getId()));
             }
-            service.addSupply(supply);
+            suppliesToAdd.add(supply);
         }
-        Image image = new Image("services/"+service.getId()+".jpg");
+        service.addSupplies(suppliesToAdd);
+
+        Image image = new Image("servicesImages/"+service.getId()+".jpg");
         service.setImage(image);
         serviceRepository.save(service);
 
@@ -213,9 +223,10 @@ public class CategoryController {
     @PutMapping("/{categoryId}/services/{serviceId}")
     public ResponseEntity<String> updateService(@PathVariable Long categoryId, @PathVariable Long serviceId, @Valid @RequestBody Service service, BindingResult bindingResult) {
         if(bindingResult.hasErrors()) {
+            System.out.println("Errors: " + bindingResult.getAllErrors());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
         }
-        if(serviceId != service.getId()) {
+        if(!Objects.equals(serviceId, service.getId())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The id in the Url is different from the one in the body");
         }
         // Is it important to also check the categoryId? It may not be in the RequestBody (service)
@@ -229,16 +240,42 @@ public class CategoryController {
         }
         List<Service> services = serviceRepository.findAllByName(service.getName());
         for (Service s : services) {
-            if(s.getCategory().getId() == categoryId)
+            if(s.getCategory().getId() == categoryId && !Objects.equals(serviceId, s.getId()))
                 return ResponseEntity.status(HttpStatus.CONFLICT).body("Service already exists in this category");
         }
 
         Service updatedService = optionalService.get();
         updatedService.setName(service.getName());
         updatedService.setDescription(service.getDescription());
-        updatedService.setImage(service.getImage());
+//        updatedService.setImage(service.getImage());
         updatedService.setAvailable(service.isAvailable());
         updatedService.setAvgPrice(service.getAvgPrice());
+        updatedService.setLastUpdated(LocalDateTime.now());
+
+        List<ServiceOption> options = new ArrayList<>();
+        for (ServiceOption option: service.getServiceOptions()) {
+            option.setService(service);
+            ServiceOption option1 = serviceOptionRepository.save(option);
+            options.add(option1);
+        }
+        updatedService.setServiceOptions(options);
+
+        List<ServiceInput> inputs = new ArrayList<>();
+        for (ServiceInput input: service.getServiceInputs()) {
+            input.setService(service);
+            ServiceInput input1 = serviceInputRepository.save(input);
+            inputs.add(input1);
+        }
+        updatedService.setServiceInputs(inputs);
+
+        List<Supply> suppliesToAdd = new ArrayList<>();
+        for (Supply supply : service.getSupplies()) {
+            if (!supplyRepository.existsById(supply.getId())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( "There is no supply with id = " + supply.getId());
+            }
+        }
+        service.setSupplies(suppliesToAdd);
+
         serviceRepository.save(updatedService);
         return ResponseEntity.status(HttpStatus.OK).body("Service updated successfully");
     }

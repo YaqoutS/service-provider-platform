@@ -77,6 +77,8 @@ public class RequestController {
             requests = requestRepository.findAll();
         }
 
+        System.out.println(requests);
+
         return ResponseEntity.status(HttpStatus.OK).body(requests);
     }
 

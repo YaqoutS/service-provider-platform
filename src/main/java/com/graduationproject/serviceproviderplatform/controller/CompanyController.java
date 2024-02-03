@@ -75,7 +75,7 @@ public class CompanyController {
 
         //name, image, field, description, phone, location
         updatedCompany.setName(company.getName());
-        updatedCompany.setImage(company.getImage());
+//        updatedCompany.setImage(company.getImage());
         updatedCompany.setField(company.getField());
         updatedCompany.setDescription(company.getDescription());
         updatedCompany.setPhone(company.getPhone());

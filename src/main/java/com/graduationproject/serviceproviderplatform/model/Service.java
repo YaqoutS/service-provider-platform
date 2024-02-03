@@ -53,6 +53,8 @@ public class Service {
 
     private LocalDateTime createdAt;
 
+    private LocalDateTime lastUpdated;
+
     @OneToMany(mappedBy = "service", cascade = CascadeType.ALL)
     private List<ServiceOption> serviceOptions = new ArrayList<>();
 
@@ -76,7 +78,7 @@ public class Service {
     public List<Appointment> getAppointments() {
         return requests.stream()
                 .map(Request::getAppointment)
-                .filter(Objects::nonNull)
+                .filter(appointment -> appointment != null && appointment.getStartDate() != null)
                 .collect(Collectors.toList());
     }
 

@@ -34,18 +34,20 @@ public class UserDTO {
 
     private Image image;
 
-//    public UserDTO(Admin admin) {
-//        if(admin != null) {
-//            this.id = admin.getId();
-//            this.fullName = admin.getFullName();
-//            this.company = new CompanyDTO(admin.getCompany());
-//            this.dateOfBirth = admin.getDateOfBirth();
-//            this.address = admin.getAddress();
-////        this.password = admin.getPassword();
-//            this.role = "ROLE_CADMIN";
-//            this.enabled = admin.isEnabled();
-//        }
-//    }
+    private Company company;
+
+    public UserDTO(Admin admin) {
+        if(admin != null) {
+            this.id = admin.getId();
+            this.fullName = admin.getFullName();
+            this.company = admin.getCompany();
+            this.dateOfBirth = admin.getDateOfBirth();
+            this.address = admin.getAddress();
+//        this.password = admin.getPassword();
+            this.role = "ROLE_CADMIN";
+            this.enabled = admin.isEnabled();
+        }
+    }
 
 //    public UserDTO(Customer customer) {
 //        if(customer != null) {

@@ -78,7 +78,7 @@ public class Employee extends User {
     public List<Appointment> getAppointments() {
         return requests.stream()
                 .map(Request::getAppointment)
-                .filter(Objects::nonNull)
+                .filter(appointment -> appointment != null && appointment.getStartDate() != null)
                 .collect(Collectors.toList());
     }
 

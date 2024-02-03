@@ -1,9 +1,8 @@
 package com.graduationproject.serviceproviderplatform.controller;
 
-import com.graduationproject.serviceproviderplatform.model.Image;
-import com.graduationproject.serviceproviderplatform.model.Supply;
-import com.graduationproject.serviceproviderplatform.model.SupplyResponseDTO;
-import com.graduationproject.serviceproviderplatform.model.User;
+import com.graduationproject.serviceproviderplatform.model.*;
+import com.graduationproject.serviceproviderplatform.repository.AdminRepository;
+import com.graduationproject.serviceproviderplatform.repository.CompanyRepository;
 import com.graduationproject.serviceproviderplatform.repository.SupplyRepository;
 import com.graduationproject.serviceproviderplatform.repository.UserRepository;
 import com.graduationproject.serviceproviderplatform.service.SupplyService;
@@ -21,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -30,19 +30,33 @@ public class SupplyController {
     private SupplyRepository supplyRepository;
     private SupplyService supplyService;
     private UserRepository userRepository;
+    private CompanyRepository companyRepository;
+    private AdminRepository adminRepository;
     private final ResourceLoader resourceLoader;
 
-    public SupplyController(SupplyRepository supplyRepository, SupplyService supplyService, UserRepository userRepository,ResourceLoader resourceLoader) {
+    public SupplyController(SupplyRepository supplyRepository, SupplyService supplyService, UserRepository userRepository, CompanyRepository companyRepository, AdminRepository adminRepository, ResourceLoader resourceLoader) {
         this.supplyRepository = supplyRepository;
         this.supplyService = supplyService;
         this.userRepository = userRepository;
+        this.companyRepository = companyRepository;
+        this.adminRepository = adminRepository;
         this.resourceLoader = resourceLoader;
     }
 
     // I think we will never use this API
     @GetMapping
-    public ResponseEntity<List<Supply>> getAllSupplies() {
-        List<Supply> supplies = supplyRepository.findAll();
+    public ResponseEntity<List<Supply>> getAllSupplies(
+            @RequestParam(required = false) Long companyId
+    ) {
+        List<Supply> supplies;
+        if(companyId != null) {
+            Optional<Company> company = companyRepository.findById(companyId);
+            if (company.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            Admin admin = adminRepository.findByCompany(company.get()).get();
+            supplies = supplyRepository.findAllByUser(admin);
+        } else {
+            supplies = supplyRepository.findAll();
+        }
         return ResponseEntity.ok(supplies);
     }
 
@@ -70,7 +84,7 @@ public class SupplyController {
         User user = userRepository.findById(supply.getUser().getId()).get();
         supply.setUser(user);
         supply = supplyRepository.save(supply);
-        Image image=new Image("suppliesImages/"+supply.getId()+".jpg");
+        Image image = new Image("suppliesImages/"+supply.getId()+".jpg");
         supply.setImage(image);
         supplyRepository.save(supply);
         return ResponseEntity.status(HttpStatus.CREATED).body(new SupplyResponseDTO(supply, "Supply created successfully with id = " + supply.getId()));
@@ -81,7 +95,7 @@ public class SupplyController {
         if(bindingResult.hasErrors()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
         }
-        if(id != supply.getId()) {
+        if(!Objects.equals(id, supply.getId())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The id in the Url is different from the one in the body");
         }
         Optional<Supply> optionalSupply = supplyRepository.findById(id);
@@ -93,7 +107,7 @@ public class SupplyController {
         updatedSupply.setName(supply.getName());
         updatedSupply.setDescription(supply.getDescription());
         updatedSupply.setPrice(supply.getPrice());
-        updatedSupply.setImage(supply.getImage());
+//        updatedSupply.setImage(supply.getImage());
         supplyRepository.save(updatedSupply);
         return ResponseEntity.status(HttpStatus.OK).body("Supply updated successfully");
     }

@@ -16,15 +16,15 @@ public class Appointment {
     @Id @GeneratedValue
     private Long id;
 
-    @NonNull
+//    @NonNull
     private LocalDate startDate;
 
-    @NonNull
+//    @NonNull
     private LocalDate endDate;
-    @NonNull
+//    @NonNull
     private LocalTime startTime;
 
-    @NonNull
+//    @NonNull
     private LocalTime endTime;
 
     @NonNull

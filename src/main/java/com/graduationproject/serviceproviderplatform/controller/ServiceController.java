@@ -72,6 +72,17 @@ public class ServiceController {
         return ResponseEntity.status(HttpStatus.OK).body("Supply added successfully");
     }
 
+    //`http://localhost:8085/services/${request.service.id}/available-employees?${request.appointment.startDate}`
+    @GetMapping("/{id}/available-employees")
+    public ResponseEntity<Set<Employee>> getServiceAvailableEmployees(@PathVariable Long id,
+                                                                      @RequestParam(required = false) LocalDate startDate) {
+        if (!serviceRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        Service service = serviceRepository.findById(id).get();
+        return ResponseEntity.ok(service.getEmployees());
+    }
+
     @PostMapping("/{serviceId}/uploadImage")
     public ResponseEntity<String> handleFileUpload(@RequestParam("image") MultipartFile image, @PathVariable String serviceId) {
         System.out.println("image received");
@@ -79,7 +90,7 @@ public class ServiceController {
             URI resourceUri = resourceLoader.getResource("classpath:").getURI();
             String decodedResourcePath = resourceUri.getPath();
             String ServiceImagesRoot = decodedResourcePath.substring(1);
-            String relativePath = "assets/services/" + serviceId + ".jpg";
+            String relativePath = "assets/servicesImages/" + serviceId + ".jpg";
             System.out.println(ServiceImagesRoot + relativePath);
             Path absolutePath = Paths.get(ServiceImagesRoot + relativePath);
             Files.createDirectories(absolutePath.getParent());

@@ -3,9 +3,11 @@ package com.graduationproject.serviceproviderplatform.controller;
 import com.graduationproject.serviceproviderplatform.model.Image;
 import com.graduationproject.serviceproviderplatform.model.User;
 import com.graduationproject.serviceproviderplatform.repository.UserRepository;
+import com.graduationproject.serviceproviderplatform.service.EmailService;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -14,6 +16,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
@@ -21,11 +24,15 @@ import java.nio.file.Paths;
 public class UserController {
     private UserRepository userRepository;
     private final ResourceLoader resourceLoader;
+    private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserController(UserRepository userRepository,ResourceLoader resourceLoader) {
+    public UserController(UserRepository userRepository, ResourceLoader resourceLoader, EmailService emailService, PasswordEncoder passwordEncoder) {
 
         this.userRepository = userRepository;
         this.resourceLoader = resourceLoader;
+        this.emailService = emailService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // Here I may add the API for changing the password
@@ -94,5 +101,20 @@ public class UserController {
             System.out.println(e.getMessage());
             return ResponseEntity.status(500).body("Error uploading image: " + e.getMessage());
         }
+    }
+
+    @PostMapping("{id}/forgot-password")
+    public ResponseEntity<String> forgotPassword(@PathVariable Long id) {
+        if(!userRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no user with id = " + id);
+        }
+        String newPassword = UUID.randomUUID().toString().substring(0, 8);
+        String secret = passwordEncoder.encode(newPassword);
+        User user = userRepository.findById(id).get();
+        user.setPassword(secret);
+        user.setConfirmPassword(secret);
+        userRepository.save(user);
+        emailService.sendPasswordResetEmail(user.getEmail(), newPassword);
+        return ResponseEntity.ok("Password reset email sent successfully!");
     }
 }
