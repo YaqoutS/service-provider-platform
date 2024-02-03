@@ -435,13 +435,13 @@ public class CategoryController {
         Service service = serviceRepository.findById(serviceId).get();
         List<Appointment> appointments = service.getAppointments();
 
-        System.out.println("Appointments" + appointments);
+//        System.out.println("Appointments" + appointments);
 
         // Group appointments by date
         Map<LocalDate, Long> appointmentsByDate = appointments.stream()
                 .collect(Collectors.groupingBy(Appointment::getStartDate, Collectors.counting()));
 
-        System.out.println("Appointments by date" + appointmentsByDate);
+//        System.out.println("Appointments by date" + appointmentsByDate);
 
         // Filter dates where all slots are reserved (assuming 10 slots per day)
         List<LocalDate> unavailableDays = appointmentsByDate.entrySet().stream()
@@ -452,13 +452,18 @@ public class CategoryController {
     }
 
     @GetMapping("/{categoryId}/services/{serviceId}/available-times/{date}")
-    public ResponseEntity<List<LocalTime>> getAvailableTimes(@PathVariable Long categoryId, @PathVariable Long serviceId, @PathVariable LocalDate date) {
+    public ResponseEntity<List<LocalTime>> getAvailableTimes(@PathVariable Long categoryId, @PathVariable Long serviceId,
+                                                             @PathVariable LocalDate date,
+                                                             @RequestParam(required = true) int timeSlot) {
         if (!categoryRepository.existsById(categoryId) || !serviceRepository.existsById(serviceId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
 
         List<LocalTime> availableTimes = getAllAvailableTimes(serviceId, date);
-        return ResponseEntity.status(HttpStatus.OK).body(availableTimes);
+
+        List<LocalTime> availableTimeSlots = findAvailableTimes(availableTimes, timeSlot);
+
+        return ResponseEntity.status(HttpStatus.OK).body(availableTimeSlots);
     }
 
     private List<LocalTime> getEmployeeAvailableTimes(Employee employee, LocalDate date) {
@@ -497,7 +502,7 @@ public class CategoryController {
         // Convert the set of available time slots to a sorted list
         List<LocalTime> availableTimes = new ArrayList<>(allTimeSlots);
         Collections.sort(availableTimes);
-        System.out.println("Available times: ");
+        System.out.println("Available times: " + availableTimes);
         System.out.println("");
         return availableTimes;
     }
@@ -515,6 +520,22 @@ public class CategoryController {
         }
         Collections.sort(availableTimes);
         return availableTimes;
+    }
+
+    private static List<LocalTime> findAvailableTimes(List<LocalTime> availableTimes, int timeSlot) {
+        List<LocalTime> resultTimes = new ArrayList<>();
+
+        for (int i = 0; i <= availableTimes.size() - timeSlot; i++) {
+            LocalTime startTime = availableTimes.get(i);
+            LocalTime endTime = startTime.plusHours(timeSlot);
+
+            // Check if the subsequent times are within the specified time slot
+            if (availableTimes.subList(i + 1, i + timeSlot).stream().allMatch(time -> time.isBefore(endTime))) {
+                resultTimes.add(startTime);
+            }
+        }
+
+        return resultTimes;
     }
 
     @PostMapping("/{categoryId}/uploadImage")
