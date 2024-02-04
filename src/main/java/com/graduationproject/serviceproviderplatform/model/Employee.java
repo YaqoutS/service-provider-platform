@@ -77,6 +77,7 @@ public class Employee extends User {
     @JsonIgnore
     public List<Appointment> getAppointments() {
         return requests.stream()
+                .filter(request -> !"Canceled".equals(request.getStatus()))
                 .map(Request::getAppointment)
                 .filter(appointment -> appointment != null && appointment.getStartDate() != null)
                 .collect(Collectors.toList());
