@@ -221,6 +221,12 @@ public class RequestController {
         return ResponseEntity.status(HttpStatus.OK).body("Request deleted successfully");
     }
 
+    @DeleteMapping()
+    public ResponseEntity<String> deleteAllRequest() {
+        requestRepository.deleteAll();
+        return ResponseEntity.status(HttpStatus.OK).body("Requests deleted successfully");
+    }
+
     // ###################################### Feedback endpoints ###################################### //
 
     @PostMapping("/{requestId}/feedback")
