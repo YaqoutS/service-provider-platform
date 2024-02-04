@@ -22,7 +22,6 @@ public class CategoryDTO {
     private Image image;
 
     private Long companyId;
-
     public CategoryDTO(Category category) {
         this.id = category.getId();
         this.name = category.getName();

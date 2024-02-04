@@ -203,7 +203,6 @@ public class CategoryController {
             input.setService(service);
             serviceInputRepository.save(input);
         }
-
         List<Supply> suppliesToAdd = new ArrayList<>();
         for (Supply supply : service.getSupplies()) {
             if (!supplyRepository.existsById(supply.getId())) {
@@ -212,11 +211,9 @@ public class CategoryController {
             suppliesToAdd.add(supply);
         }
         service.addSupplies(suppliesToAdd);
-
         Image image = new Image("servicesImages/"+service.getId()+".jpg");
         service.setImage(image);
         serviceRepository.save(service);
-
         return ResponseEntity.status(HttpStatus.OK).body(new ServiceResponseDTO(service,"service created successfully"));
     }
 
@@ -275,7 +272,6 @@ public class CategoryController {
             }
         }
         service.setSupplies(suppliesToAdd);
-
         serviceRepository.save(updatedService);
         return ResponseEntity.status(HttpStatus.OK).body("Service updated successfully");
     }
@@ -506,22 +502,6 @@ public class CategoryController {
         System.out.println("");
         return availableTimes;
     }
-
-    private List<LocalTime> getAllAvailableTimes(Long serviceId, LocalDate date) {
-        Service service = serviceRepository.findById(serviceId).get();
-        List<LocalTime> availableTimes = new ArrayList<>();
-
-        for (Employee employee : service.getEmployees()) {
-            List<LocalTime> employeeTimes = getEmployeeAvailableTimes(employee, date);
-            employeeTimes = employeeTimes.stream()
-                    .filter(time -> !availableTimes.contains(time))
-                    .collect(Collectors.toList());
-            availableTimes.addAll(employeeTimes);
-        }
-        Collections.sort(availableTimes);
-        return availableTimes;
-    }
-
     private static List<LocalTime> findAvailableTimes(List<LocalTime> availableTimes, int timeSlot) {
         List<LocalTime> resultTimes = new ArrayList<>();
 
@@ -536,6 +516,20 @@ public class CategoryController {
         }
 
         return resultTimes;
+    }
+    private List<LocalTime> getAllAvailableTimes(Long serviceId, LocalDate date) {
+        Service service = serviceRepository.findById(serviceId).get();
+        List<LocalTime> availableTimes = new ArrayList<>();
+
+        for (Employee employee : service.getEmployees()) {
+            List<LocalTime> employeeTimes = getEmployeeAvailableTimes(employee, date);
+            employeeTimes = employeeTimes.stream()
+                    .filter(time -> !availableTimes.contains(time))
+                    .collect(Collectors.toList());
+            availableTimes.addAll(employeeTimes);
+        }
+        Collections.sort(availableTimes);
+        return availableTimes;
     }
 
     @PostMapping("/{categoryId}/uploadImage")

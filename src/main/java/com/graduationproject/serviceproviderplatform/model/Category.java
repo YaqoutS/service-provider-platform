@@ -3,7 +3,6 @@ package com.graduationproject.serviceproviderplatform.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -19,13 +18,11 @@ import java.util.Set;
 public class Category {
     @Id @GeneratedValue
     private Long id;
-
+    private LocalDateTime lastUpdated;
     @NonNull
     private String name;
 
     private String description;
-
-    private LocalDateTime lastUpdated;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "image_id", referencedColumnName = "id")

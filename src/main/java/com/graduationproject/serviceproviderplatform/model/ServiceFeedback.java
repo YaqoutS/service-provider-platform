@@ -18,13 +18,13 @@ public class ServiceFeedback {
     @Id @GeneratedValue
     private Long id;
 
-    @NonNull
+
     @ManyToOne
     @JsonIgnore
     @ToString.Exclude
     private Customer customer;
 
-    @NonNull
+
     @ManyToOne
     @JsonIgnore
     @ToString.Exclude

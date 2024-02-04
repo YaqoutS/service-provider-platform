@@ -25,9 +25,9 @@ public class Address {
 
     private String postalCode;
 
-    private Long latitude;
+    private Double latitude;
 
-    private Long longitude;
+    private Double longitude;
 
     public Address(String city, String line1, String line2, String postalCode) {
         this.city = city;

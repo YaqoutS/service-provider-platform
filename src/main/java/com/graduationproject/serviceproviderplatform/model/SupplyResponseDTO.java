@@ -3,7 +3,6 @@ package com.graduationproject.serviceproviderplatform.model;
 public class SupplyResponseDTO {
     private Supply supply;
     private String message;
-
     public SupplyResponseDTO(Supply supply, String message) {
         this.supply = supply;
         this.message = message;
@@ -24,4 +23,6 @@ public class SupplyResponseDTO {
     public void setMessage(String message) {
         this.message = message;
     }
+
 }
+

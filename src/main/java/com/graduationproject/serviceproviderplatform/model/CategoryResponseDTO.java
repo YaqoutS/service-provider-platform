@@ -24,4 +24,6 @@ public class CategoryResponseDTO {
     public void setMessage(String message) {
         this.message = message;
     }
+
 }
+

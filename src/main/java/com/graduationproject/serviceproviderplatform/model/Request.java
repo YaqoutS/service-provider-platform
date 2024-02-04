@@ -60,8 +60,8 @@ public class Request {
         this.price = requestDTO.getPrice();
         this.optionChoices = requestDTO.getOptionChoices();
         this.inputChoices = requestDTO.getInputChoices();
+        this.supplyChoices = requestDTO.getSupplyChoices();
     }
-
     public List<OptionChoice> getOptionChoices() {
         return optionChoices.stream().filter(optionChoice -> optionChoice.getOption().getService() != null).collect(Collectors.toList());
     }

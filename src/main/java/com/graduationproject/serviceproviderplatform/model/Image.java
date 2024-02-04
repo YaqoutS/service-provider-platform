@@ -20,5 +20,6 @@ public class Image {
     @Lob
     @Column(length = 100000)
     private byte[] imageData;
+
 }
 

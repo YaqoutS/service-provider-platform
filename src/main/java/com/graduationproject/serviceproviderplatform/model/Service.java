@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class Service {
     @Id @GeneratedValue
     private Long id;
-
+    private LocalDateTime lastUpdated;
     @NonNull
     private String name;
 
@@ -52,8 +52,6 @@ public class Service {
     private Long avgPrice;
 
     private LocalDateTime createdAt;
-
-    private LocalDateTime lastUpdated;
 
     @OneToMany(mappedBy = "service", cascade = CascadeType.ALL)
     private List<ServiceOption> serviceOptions = new ArrayList<>();
@@ -99,7 +97,9 @@ public class Service {
         supplies.remove(supply);
     }
 
+
     public void addSupplies(List<Supply> supplies) {
         supplies.addAll(supplies);
     }
+
 }

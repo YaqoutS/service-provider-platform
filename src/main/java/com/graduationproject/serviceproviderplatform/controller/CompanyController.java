@@ -11,13 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
 import java.time.DayOfWeek;
 import java.util.EnumSet;
 import java.util.List;
@@ -32,7 +30,6 @@ public class CompanyController {
     private AdminRepository adminRepository;
     private CompanyService companyService;
     private final ResourceLoader resourceLoader;
-
     public CompanyController(CompanyRepository companyRepository, AdminRepository adminRepository, CompanyService companyService,ResourceLoader resourceLoader) {
         this.companyRepository = companyRepository;
         this.adminRepository = adminRepository;
@@ -75,7 +72,7 @@ public class CompanyController {
 
         //name, image, field, description, phone, location
         updatedCompany.setName(company.getName());
-//        updatedCompany.setImage(company.getImage());
+       // updatedCompany.setImage(company.getImage());
         updatedCompany.setField(company.getField());
         updatedCompany.setDescription(company.getDescription());
         updatedCompany.setPhone(company.getPhone());
@@ -170,6 +167,11 @@ public class CompanyController {
         return ResponseEntity.ok(admin);
     }
 
+    @GetMapping("/admins")
+    public ResponseEntity<List<Admin>> getCompanyAdmins() {
+        return ResponseEntity.ok(adminRepository.findAll());
+    }
+
     @GetMapping("/{id}/appointments")
     public ResponseEntity<List<Appointment>> getCompanyAppointments(@PathVariable Long id) {
         if(!companyRepository.existsById(id)) {
@@ -182,6 +184,7 @@ public class CompanyController {
     @PostMapping("/{companyId}/uploadImage")
     public ResponseEntity<String> handleFileUpload(@RequestParam("image") MultipartFile image, @PathVariable Long companyId) {
         System.out.println("image received");
+
         Company company = companyRepository.findById(companyId).get();
         Image companyImage=new Image("companiesImages/" + companyId.intValue() + ".jpg");
         company.setImage(companyImage);
@@ -193,7 +196,9 @@ public class CompanyController {
             String relativePath = "assets/companiesImages/" + companyId.intValue() + ".jpg";
             System.out.println(ServiceImagesRoot+relativePath);
             Path absolutePath = Paths.get(ServiceImagesRoot+relativePath);
+
             Files.createDirectories(absolutePath.getParent());
+
             Files.write(absolutePath, image.getBytes());
             return ResponseEntity.ok("Image uploaded successfully. Path: " + relativePath);
         } catch (IOException e) {

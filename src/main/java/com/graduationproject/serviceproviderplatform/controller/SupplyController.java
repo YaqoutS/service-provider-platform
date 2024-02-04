@@ -1,6 +1,9 @@
 package com.graduationproject.serviceproviderplatform.controller;
 
-import com.graduationproject.serviceproviderplatform.model.*;
+import com.graduationproject.serviceproviderplatform.model.Image;
+import com.graduationproject.serviceproviderplatform.model.Supply;
+import com.graduationproject.serviceproviderplatform.model.SupplyResponseDTO;
+import com.graduationproject.serviceproviderplatform.model.User;
 import com.graduationproject.serviceproviderplatform.repository.AdminRepository;
 import com.graduationproject.serviceproviderplatform.repository.CompanyRepository;
 import com.graduationproject.serviceproviderplatform.repository.SupplyRepository;
@@ -22,6 +25,9 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import com.graduationproject.serviceproviderplatform.model.*;
+import com.graduationproject.serviceproviderplatform.repository.AdminRepository;
+import com.graduationproject.serviceproviderplatform.repository.CompanyRepository;
 
 @RestController
 @RequestMapping("/supplies")
@@ -30,10 +36,9 @@ public class SupplyController {
     private SupplyRepository supplyRepository;
     private SupplyService supplyService;
     private UserRepository userRepository;
+    private final ResourceLoader resourceLoader;
     private CompanyRepository companyRepository;
     private AdminRepository adminRepository;
-    private final ResourceLoader resourceLoader;
-
     public SupplyController(SupplyRepository supplyRepository, SupplyService supplyService, UserRepository userRepository, CompanyRepository companyRepository, AdminRepository adminRepository, ResourceLoader resourceLoader) {
         this.supplyRepository = supplyRepository;
         this.supplyService = supplyService;
@@ -42,7 +47,6 @@ public class SupplyController {
         this.adminRepository = adminRepository;
         this.resourceLoader = resourceLoader;
     }
-
     // I think we will never use this API
     @GetMapping
     public ResponseEntity<List<Supply>> getAllSupplies(
@@ -102,7 +106,6 @@ public class SupplyController {
         if(optionalSupply.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no supply with id = " + supply.getId());
         }
-
         Supply updatedSupply = optionalSupply.get();
         updatedSupply.setName(supply.getName());
         updatedSupply.setDescription(supply.getDescription());
@@ -122,9 +125,11 @@ public class SupplyController {
         return ResponseEntity.status(HttpStatus.OK).body("Supply deleted successfully");
     }
 
+
     @PostMapping("/{supplyId}/uploadImage")
     public ResponseEntity<String> handleFileUpload(@RequestParam("image") MultipartFile image, @PathVariable String supplyId) {
         System.out.println("image received");
+
         try {
             URI resourceUri = resourceLoader.getResource("classpath:").getURI();
             String decodedResourcePath = resourceUri.getPath();
@@ -132,7 +137,9 @@ public class SupplyController {
             String relativePath = "assets/suppliesImages/" + supplyId + ".jpg";
             System.out.println(ServiceImagesRoot+relativePath);
             Path absolutePath = Paths.get(ServiceImagesRoot+relativePath);
+
             Files.createDirectories(absolutePath.getParent());
+
             Files.write(absolutePath, image.getBytes());
             return ResponseEntity.ok("Image uploaded successfully. Path: " + relativePath);
         } catch (IOException e) {

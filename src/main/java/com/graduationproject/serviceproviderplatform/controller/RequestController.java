@@ -30,7 +30,6 @@ public class RequestController {
     private InputChoiceRepository inputChoiceRepository;
     private SupplyChoiceRepository supplyChoiceRepository;
     private AddressRepository addressRepository;
-
     public RequestController(RequestRepository requestRepository, RequestService requestService, ServiceRepository serviceRepository, EmployeeRepository employeeRepository, CustomerRepository customerRepository, ServiceFeedbackRepository feedbackRepository, FeedbackService feedbackService, OptionChoiceRepository optionChoiceRepository, InputChoiceRepository inputChoiceRepository, SupplyChoiceRepository supplyChoiceRepository, AddressRepository addressRepository) {
         this.requestRepository = requestRepository;
         this.requestService = requestService;
@@ -60,6 +59,7 @@ public class RequestController {
             requests = requestRepository.findByEmployee_IdAndStatusAndService_Id(employeeId, status,serviceId);
         }else if (status != null && employeeId != null) {
             requests = requestRepository.findByEmployee_IdAndStatus(employeeId, status);
+
         }
         else if ( employeeId != null && serviceId != null) {
             requests = requestRepository.findByEmployee_IdAndService_Id(employeeId, serviceId);
@@ -77,10 +77,9 @@ public class RequestController {
             requests = requestRepository.findAll();
         }
 
-        System.out.println(requests);
-
         return ResponseEntity.status(HttpStatus.OK).body(requests);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Request> getRequestById(@PathVariable Long id) {
@@ -92,35 +91,35 @@ public class RequestController {
     }
 
     @PostMapping
-    public ResponseEntity<String> createRequest(@Valid @RequestBody RequestDTO requestDTO, BindingResult bindingResult) {
+    public ResponseEntity<Request> createRequest(@Valid @RequestBody RequestDTO requestDTO, BindingResult bindingResult) {
         System.out.println(requestDTO);
         if (bindingResult.hasErrors()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
         if (requestDTO.getServiceId() == null || requestDTO.getCustomerId() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Bad request");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
         Request request = new Request(requestDTO);  // service, employee, customer
         request.setStatus("Pending");
 
         if (!serviceRepository.existsById(requestDTO.getServiceId())) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no service with id = " + requestDTO.getServiceId());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
         Service service = serviceRepository.findById(requestDTO.getServiceId()).get();
         request.setService(service);
 
         if (!customerRepository.existsById(requestDTO.getCustomerId())) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no customer with id = " + requestDTO.getCustomerId());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
         request.setCustomer(customerRepository.findById(requestDTO.getCustomerId()).get());
 
         if (requestDTO.getEmployeeId() != null) {
             if (!employeeRepository.existsById(requestDTO.getEmployeeId())) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no employee with id = " + requestDTO.getEmployeeId());
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
             Employee employee = employeeRepository.findById(requestDTO.getEmployeeId()).get();
             if (!service.getEmployees().contains(employee)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no employee for this service with id = " + requestDTO.getEmployeeId());
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
             request.setEmployee(employee);
         }
@@ -140,7 +139,7 @@ public class RequestController {
             choice.setRequest(request);
             supplyChoiceRepository.save(choice);
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body("Request created successfully with id = " + request.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(request);
     }
 
     @PutMapping("/{id}")
@@ -170,14 +169,8 @@ public class RequestController {
             updatedRequest.getAppointment().setEndDate(requestDTO.getAppointment().getEndDate());
             updatedRequest.getAppointment().setStartTime(requestDTO.getAppointment().getStartTime());
             updatedRequest.getAppointment().setEndTime(requestDTO.getAppointment().getEndTime());
-//            Optional<Address> address = addressRepository.findById(requestDTO.getAppointment().getAddress().getId());
-//            if (address.isPresent()) {
-//                updatedRequest.getAppointment().setAddress(address.get());
-//            } else {
-//                //updatedRequest.getAppointment().setAddress(requestDTO.getAppointment().getAddress());
-//                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no address with the specified id");
-//            }
-        }
+          }
+
 
         // Update the employee
         if (requestDTO.getEmployeeId() == null) {

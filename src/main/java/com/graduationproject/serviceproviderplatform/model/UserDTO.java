@@ -33,7 +33,6 @@ public class UserDTO {
     private boolean enabled;
 
     private Image image;
-
     private Company company;
 
     public UserDTO(Admin admin) {
