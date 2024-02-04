@@ -170,6 +170,15 @@ public class CompanyController {
         return ResponseEntity.ok(admin);
     }
 
+    @GetMapping("/{id}/appointments")
+    public ResponseEntity<List<Appointment>> getCompanyAppointments(@PathVariable Long id) {
+        if(!companyRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        Company company = companyRepository.findById(id).get();
+        return ResponseEntity.status(HttpStatus.OK).body(company.getAppointments());
+    }
+
     @PostMapping("/{companyId}/uploadImage")
     public ResponseEntity<String> handleFileUpload(@RequestParam("image") MultipartFile image, @PathVariable Long companyId) {
         System.out.println("image received");

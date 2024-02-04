@@ -7,6 +7,7 @@ import lombok.*;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @RequiredArgsConstructor
@@ -69,5 +70,12 @@ public class Company {
         defaultWorkDays.remove(DayOfWeek.FRIDAY);
         return Optional.ofNullable(workDays)
                 .orElse(defaultWorkDays);
+    }
+
+    public List<Appointment> getAppointments() {
+        return categories.stream()
+                .flatMap(category -> category.getServices().stream())
+                .flatMap(service -> service.getAppointments().stream())
+                .collect(Collectors.toList());
     }
 }
