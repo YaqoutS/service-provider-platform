@@ -84,6 +84,14 @@ public class Employee extends User {
         services.remove(service);
     }
 
+    public void addServices(Set<Service> services) {
+        services.addAll(services);
+    }
+
+    public void removeServices(Set<Service> services) {
+        services.removeAll(services);
+    }
+
     @JsonIgnore
     public List<Appointment> getAppointments() {
         return requests.stream()

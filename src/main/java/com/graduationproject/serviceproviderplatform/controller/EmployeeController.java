@@ -136,12 +136,34 @@ public class EmployeeController {
     }
 
     @GetMapping("/{id}/services")
-    public ResponseEntity<Set<Service>> getEmployeeServicess(@PathVariable Long id) {
+    public ResponseEntity<Set<Service>> getEmployeeServices(@PathVariable Long id) {
         if(!employeeRepository.existsById(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
         Employee employee = employeeRepository.findById(id).get();
         return ResponseEntity.status(HttpStatus.OK).body(employee.getServices());
+    }
+
+    @PutMapping("/{id}/services")
+    public ResponseEntity<String> updateEmployeeServices(@PathVariable Long id, @RequestBody Set<Service> services) {
+        if(!employeeRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no employee with id = " + id);
+        }
+        Employee employee = employeeRepository.findById(id).get();
+        for (Service service: employee.getServices()) {
+            service.removeEmployee(employee);
+        }
+        for (Service service: services) {
+            service.addEmployee(employee);
+            serviceRepository.save(service);
+//            employee.addService(serviceRepository.findById(service.getId()).get());
+        }
+//        employee.addServices(services);
+        employee.setConfirmPassword(employee.getPassword());
+        employee = employeeRepository.save(employee);
+        System.out.println(services);
+        System.out.println(employee.getServices());
+        return ResponseEntity.status(HttpStatus.OK).body("Services updated successfully");
     }
 
     @GetMapping("/{id}/requests")
