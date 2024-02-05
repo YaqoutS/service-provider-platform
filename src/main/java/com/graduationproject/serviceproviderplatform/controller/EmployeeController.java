@@ -88,6 +88,19 @@ public class EmployeeController {
         return ResponseEntity.status(HttpStatus.OK).body("Employee updated successfully");
     }
 
+    @PutMapping("/{id}/enable")
+    public ResponseEntity<String> enableEmployee(@PathVariable Long id) {
+        Optional<Employee> employee = employeeRepository.findById(id);
+        if(employee.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no employee with id = " + id);
+        }
+        Employee employee1 = employee.get();
+        employee1.setConfirmPassword(employee1.getPassword());
+        employee1.setEnabled(true);
+        employeeRepository.save(employee1);
+        return ResponseEntity.status(HttpStatus.OK).body("Employee accepted successfully");
+    }
+
     //@Secured({"ROLE_ADMIN", "ROLE_EMPLOYEE"})
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteEmployee(@PathVariable Long id) {

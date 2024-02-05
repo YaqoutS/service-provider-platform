@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class Service {
     @Id @GeneratedValue
     private Long id;
-    private LocalDateTime lastUpdated;
+
     @NonNull
     private String name;
 
@@ -27,6 +27,10 @@ public class Service {
 
     @NonNull
     private String description;
+
+    private LocalDateTime lastUpdated;
+
+    private double rating;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "image_id", referencedColumnName = "id")
@@ -72,8 +76,39 @@ public class Service {
     @ToString.Exclude
     private List<Request> requests = new ArrayList<>();
 
+
+//    public void updateRating() {
+//        // Calculate the average rating from all feedbacks in the requests
+//        if (requests != null && !requests.isEmpty()) {
+//            double totalRating = requests.stream()
+//                    .filter(request -> request.getFeedback() != null)
+//                    .mapToDouble(request -> request.getFeedback().getRating())
+//                    .sum();
+//
+//            rating = totalRating / getTotalRequestsCount();
+//        } else {
+//            // No requests, set the rating to a default value or handle accordingly
+//            rating = 0.0;
+//        }
+//    }
+//
+//    private int getTotalRequestsCount() {
+//        return requests.stream()
+//                .filter(request -> request.getFeedback() != null)
+//                .collect(Collectors.toList()).size();
+//    }
+
+    public double calculateAverageRating() {
+        return requests.stream()
+                .filter(request -> request.getFeedback() != null)
+                .mapToDouble(request -> request.getFeedback().getRating())
+                .average()
+                .orElse(0.0);
+    }
+
     @JsonIgnore
     public List<Appointment> getAppointments() {
+        if (requests.isEmpty()) return Collections.emptyList();
         return requests.stream()
                 .filter(request -> !"Canceled".equals(request.getStatus()))
                 .map(Request::getAppointment)

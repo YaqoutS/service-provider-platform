@@ -32,6 +32,8 @@ public class Company {
     @NonNull
     private String description;
 
+    private double rating;
+
     private String phone;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -64,6 +66,31 @@ public class Company {
         this.phone = companyDTO.getPhone();
         this.address = companyDTO.getAddress();
     }
+
+//    public void updateRating() {
+//        // Calculate the average rating from all feedbacks in the requests
+//        if (categories != null && !categories.isEmpty()) {
+//            double totalRating = categories.stream()
+//                    .flatMap(category -> category.getServices().stream())
+//                    .flatMap(service -> service.getRequests().stream())
+//                    .filter(request -> request.getFeedback() != null)
+//                    .mapToDouble(request -> request.getFeedback().getRating())
+//                    .sum();
+//
+//            rating = totalRating / getTotalRequestsCount();
+//        } else {
+//            // No categories, set the rating to a default value or handle accordingly
+//            rating = 0.0;
+//        }
+//    }
+//
+//    private int getTotalRequestsCount() {
+//        return categories.stream()
+//                .flatMap(category -> category.getServices().stream())
+//                .flatMap(service -> service.getRequests().stream())
+//                .filter(request -> request.getFeedback() != null)
+//                .collect(Collectors.toList()).size();
+//    }
 
     public Set<DayOfWeek> getWorkDays() {
         Set<DayOfWeek> defaultWorkDays = EnumSet.allOf(DayOfWeek.class);

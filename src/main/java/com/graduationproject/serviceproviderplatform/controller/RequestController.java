@@ -30,7 +30,8 @@ public class RequestController {
     private InputChoiceRepository inputChoiceRepository;
     private SupplyChoiceRepository supplyChoiceRepository;
     private AddressRepository addressRepository;
-    public RequestController(RequestRepository requestRepository, RequestService requestService, ServiceRepository serviceRepository, EmployeeRepository employeeRepository, CustomerRepository customerRepository, ServiceFeedbackRepository feedbackRepository, FeedbackService feedbackService, OptionChoiceRepository optionChoiceRepository, InputChoiceRepository inputChoiceRepository, SupplyChoiceRepository supplyChoiceRepository, AddressRepository addressRepository) {
+    private CompanyRepository companyRepository;
+    public RequestController(RequestRepository requestRepository, RequestService requestService, ServiceRepository serviceRepository, EmployeeRepository employeeRepository, CustomerRepository customerRepository, ServiceFeedbackRepository feedbackRepository, FeedbackService feedbackService, OptionChoiceRepository optionChoiceRepository, InputChoiceRepository inputChoiceRepository, SupplyChoiceRepository supplyChoiceRepository, AddressRepository addressRepository, CompanyRepository companyRepository) {
         this.requestRepository = requestRepository;
         this.requestService = requestService;
         this.serviceRepository = serviceRepository;
@@ -42,6 +43,7 @@ public class RequestController {
         this.inputChoiceRepository = inputChoiceRepository;
         this.supplyChoiceRepository = supplyChoiceRepository;
         this.addressRepository = addressRepository;
+        this.companyRepository = companyRepository;
     }
 
     @GetMapping
@@ -231,10 +233,18 @@ public class RequestController {
         if (!requestRepository.existsById(requestId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("There is no request with id = " + requestId);
         }
+
         Request request = requestRepository.findById(requestId).get();
 
-        feedback.setEmployee(request.getEmployee());
-        feedback.setCustomer(request.getCustomer());
+//        employeeRepository.findById(request.getEmployee().getId()).get().updateRating();
+//        serviceRepository.findById(request.getCustomer().getId()).get().updateRating();
+//        if (request.getService().getCategory().getCompany() != null) {
+//            companyRepository.findById(request.getService().getCategory().getCompany().getId()).get().updateRating();
+//        }
+
+//        feedback.setEmployee(request.getEmployee());
+//        feedback.setCustomer(request.getCustomer());
+        feedback.setRequest(request);
 
         feedback = feedbackRepository.save(feedback);
         request.setFeedback(feedback);
