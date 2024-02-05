@@ -25,9 +25,9 @@ public class CustomerService {
         for (Request request : customer.getRequests()) {
             requestService.delete(request);
         }
-//        for (ServiceFeedback feedback : customer.getFeedbacks()) {
-//            feedbackService.delete(feedback);
-//        }
+        for (ServiceFeedback feedback : customer.getFeedbacks()) {
+            feedbackService.delete(feedback);
+        }
         customerRepository.delete(customer);
     }
 }

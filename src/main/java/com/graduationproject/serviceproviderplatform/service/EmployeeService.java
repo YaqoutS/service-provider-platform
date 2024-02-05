@@ -26,9 +26,9 @@ public class EmployeeService {
         for (Request request : employee.getRequests()) {
             requestService.delete(request);
         }
-//        for (ServiceFeedback feedback : employee.getFeedbacks()) {
-//            feedbackService.delete(feedback);
-//        }
+        for (ServiceFeedback feedback : employee.getFeedbacks()) {
+            feedbackService.delete(feedback);
+        }
         for (Supply supply : employee.getSupplies()) {
             supplyService.delete(supply);
         }

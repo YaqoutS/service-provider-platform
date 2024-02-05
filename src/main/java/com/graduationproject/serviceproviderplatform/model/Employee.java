@@ -44,8 +44,10 @@ public class Employee extends User {
     @ToString.Exclude
     private List<Request> requests = new ArrayList<>();
 
-//    @OneToMany(mappedBy = "employee")
-//    private List<ServiceFeedback> feedbacks = new ArrayList<>();
+    @OneToMany(mappedBy = "employee")
+    @JsonIgnore
+    @ToString.Exclude
+    private List<ServiceFeedback> feedbacks = new ArrayList<>();
 
 
     public Employee(@NonNull String fullName, @NonNull @Size(min = 8, max = 30) String email, @NonNull String password, @NonNull boolean enabled) {
@@ -64,6 +66,16 @@ public class Employee extends User {
 //        this.rating = employeeDTO.getRating();
 //    }
 
+    public double getRating() {
+        double rating = requests.stream()
+                .filter(request -> request.getFeedback() != null)
+                .mapToDouble(request -> request.getFeedback().getRating())
+                .average()
+                .orElse(0.0);
+        this.rating = rating;
+        return rating;
+    }
+
     public void addService(Service service) {
         services.add(service);
     }
@@ -72,51 +84,8 @@ public class Employee extends User {
         services.remove(service);
     }
 
-
-//    public void updateRating() {
-//        // Calculate the average rating from all feedbacks in the requests
-//        if (requests != null && !requests.isEmpty()) {
-//            double totalRating = requests.stream()
-//                    .filter(request -> request.getFeedback() != null)
-//                    .mapToDouble(request -> request.getFeedback().getRating())
-//                    .sum();
-//
-//            rating = totalRating / getTotalRequestsCount()  ;
-//        } else {
-//            // No requests, set the rating to a default value or handle accordingly
-//            rating = 0.0;
-//        }
-//    }
-//
-//    private int getTotalRequestsCount() {
-//        return requests.stream()
-//                .filter(request -> request.getFeedback() != null)
-//                .collect(Collectors.toList()).size();
-//    }
-
-    public double calculateAverageRating() {
-        return requests.stream()
-                .filter(request -> request.getFeedback() != null)
-                .mapToDouble(request -> request.getFeedback().getRating())
-                .average()
-                .orElse(0.0);
-    }
-
-    public List<ServiceFeedback> getFeedbacks() {
-        List<ServiceFeedback> feedbacks = new ArrayList<>();
-        if (requests != null && !requests.isEmpty()) {
-            feedbacks = requests.stream()
-                    .filter(request -> request.getFeedback() != null)
-                    .map(request -> request.getFeedback())
-                    .collect(Collectors.toList());
-
-        }
-        return feedbacks;
-    }
-
     @JsonIgnore
     public List<Appointment> getAppointments() {
-        if (requests.isEmpty()) return Collections.emptyList();
         return requests.stream()
                 .filter(request -> !"Canceled".equals(request.getStatus()))
                 .map(Request::getAppointment)
