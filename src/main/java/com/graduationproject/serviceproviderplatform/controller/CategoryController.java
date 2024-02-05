@@ -249,6 +249,10 @@ public class CategoryController {
         updatedService.setAvgPrice(service.getAvgPrice());
         updatedService.setLastUpdated(LocalDateTime.now());
 
+        for (ServiceOption option: updatedService.getServiceOptions()) {
+            option.setService(null);
+            serviceOptionRepository.save(option);
+        }
         List<ServiceOption> options = new ArrayList<>();
         for (ServiceOption option: service.getServiceOptions()) {
             option.setService(service);
@@ -257,6 +261,10 @@ public class CategoryController {
         }
         updatedService.setServiceOptions(options);
 
+        for (ServiceInput input: updatedService.getServiceInputs()) {
+            input.setService(null);
+            serviceInputRepository.save(input);
+        }
         List<ServiceInput> inputs = new ArrayList<>();
         for (ServiceInput input: service.getServiceInputs()) {
             input.setService(service);
@@ -265,13 +273,15 @@ public class CategoryController {
         }
         updatedService.setServiceInputs(inputs);
 
+        updatedService.removeSupplies(updatedService.getSupplies());
         List<Supply> suppliesToAdd = new ArrayList<>();
         for (Supply supply : service.getSupplies()) {
             if (!supplyRepository.existsById(supply.getId())) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body( "There is no supply with id = " + supply.getId());
             }
+            suppliesToAdd.add(supply);
         }
-        service.setSupplies(suppliesToAdd);
+        updatedService.addSupplies(suppliesToAdd);
         serviceRepository.save(updatedService);
         return ResponseEntity.status(HttpStatus.OK).body("Service updated successfully");
     }

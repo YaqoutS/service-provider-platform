@@ -111,7 +111,10 @@ public class Service {
 
 
     public void addSupplies(List<Supply> supplies) {
-        supplies.addAll(supplies);
+        this.supplies.addAll(supplies);
     }
 
+    public void removeSupplies(List<Supply> supplies) {
+        supplies.removeAll(supplies);
+    }
 }
