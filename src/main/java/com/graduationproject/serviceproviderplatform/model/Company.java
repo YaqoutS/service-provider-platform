@@ -74,6 +74,16 @@ public class Company {
                 .orElse(defaultWorkDays);
     }
 
+    public LocalTime getWorkStartTime() {
+        if (workStartTime == null) return LocalTime.of(8, 0);
+        return workStartTime;
+    }
+
+    public LocalTime getWorkEndTime() {
+        if (workEndTime == null) return LocalTime.of(16, 0);
+        return workEndTime;
+    }
+
     public List<Appointment> getAppointments() {
         return categories.stream()
                 .flatMap(category -> category.getServices().stream())

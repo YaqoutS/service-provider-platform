@@ -280,4 +280,13 @@ public class RequestController {
         feedbackService.delete(feedback);
         return ResponseEntity.status(HttpStatus.OK).body("Feedback deleted successfully");
     }
+
+    @GetMapping("/{id}/employee-suggestion")
+    public ResponseEntity<Employee> getAIEmployeeSuggestion(@PathVariable Long id) {
+        if (!requestRepository.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
+        return null;
+    }
 }

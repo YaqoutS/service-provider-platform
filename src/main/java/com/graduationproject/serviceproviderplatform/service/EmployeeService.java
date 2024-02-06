@@ -2,17 +2,23 @@ package com.graduationproject.serviceproviderplatform.service;
 
 import com.graduationproject.serviceproviderplatform.model.*;
 import com.graduationproject.serviceproviderplatform.repository.EmployeeRepository;
+import com.graduationproject.serviceproviderplatform.repository.RequestRepository;
+import com.graduationproject.serviceproviderplatform.repository.ServiceFeedbackRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 @org.springframework.stereotype.Service
 public class EmployeeService {
     private EmployeeRepository employeeRepository;
-    private RequestService requestService; // When deleting an employee, all related requests will be deleted and the feedback for each request will be deleted with it
+    private RequestRepository requestRepository;
+    private ServiceFeedbackRepository feedbackRepository;
+    private RequestService requestService;
     private FeedbackService feedbackService;
     private SupplyService supplyService;
 
-    public EmployeeService(EmployeeRepository employeeRepository, RequestService requestService, FeedbackService feedbackService, SupplyService supplyService) {
+    public EmployeeService(EmployeeRepository employeeRepository, RequestRepository requestRepository, ServiceFeedbackRepository feedbackRepository, RequestService requestService, FeedbackService feedbackService, SupplyService supplyService) {
         this.employeeRepository = employeeRepository;
+        this.requestRepository = requestRepository;
+        this.feedbackRepository = feedbackRepository;
         this.requestService = requestService;
         this.feedbackService = feedbackService;
         this.supplyService = supplyService;
@@ -23,11 +29,13 @@ public class EmployeeService {
         for (Service service : employee.getServices()) {
             service.removeEmployee(employee);
         }
-        for (Request request : employee.getRequests()) {
-            requestService.delete(request);
-        }
         for (ServiceFeedback feedback : employee.getFeedbacks()) {
-            feedbackService.delete(feedback);
+            feedback.setEmployee(null);
+            feedbackRepository.save(feedback);
+        }
+        for (Request request : employee.getRequests()) {
+            request.setEmployee(null);
+            requestRepository.save(request);
         }
         for (Supply supply : employee.getSupplies()) {
             supplyService.delete(supply);

@@ -6,6 +6,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 
 @Getter
 @Setter
@@ -13,6 +15,8 @@ import lombok.*;
 @NoArgsConstructor
 public class CategoryDTO {
     private Long id;
+
+    private LocalDateTime lastUpdated;
 
     @NonNull
     private String name;
@@ -24,6 +28,7 @@ public class CategoryDTO {
     private Long companyId;
     public CategoryDTO(Category category) {
         this.id = category.getId();
+        this.lastUpdated = category.getLastUpdated();
         this.name = category.getName();
         this.description = category.getDescription();
         this.image = category.getImage();

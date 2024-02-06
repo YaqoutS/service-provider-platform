@@ -113,11 +113,13 @@ public class Employee extends User {
 
     public LocalTime getWorkStartTime() {
         if (company != null) return company.getWorkStartTime();
+        if (workStartTime == null) return LocalTime.of(8, 0);
         return workStartTime;
     }
 
     public LocalTime getWorkEndTime() {
         if (company != null) return company.getWorkEndTime();
+        if (workEndTime == null) return LocalTime.of(16, 0);
         return workEndTime;
     }
 }

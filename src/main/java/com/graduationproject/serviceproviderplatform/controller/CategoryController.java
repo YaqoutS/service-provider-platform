@@ -114,7 +114,7 @@ public class CategoryController {
         updatedCategory.setName(category.getName());
         updatedCategory.setDescription((category.getDescription()));
 //        updatedCategory.setImage(category.getImage());
-        updatedCategory.setCompany(companyRepository.findById(category.getCompanyId()).get());
+//        updatedCategory.setCompany(companyRepository.findById(category.getCompanyId()).get());
         updatedCategory.setLastUpdated(LocalDateTime.now());
         categoryRepository.save(updatedCategory);
         return ResponseEntity.status(HttpStatus.OK).body("Category updated successfully");

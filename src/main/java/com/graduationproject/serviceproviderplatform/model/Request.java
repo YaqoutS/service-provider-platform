@@ -28,7 +28,6 @@ public class Request {
     @ManyToOne
     private Employee employee;
 
-    @NonNull
     @ManyToOne
     private Customer customer;
 
